@@ -54,7 +54,6 @@ menuAdm = do
     putStrLn "3 - Alterar disponibilidade hotelzinho"
     putStrLn "4 - listar resumo de atendimentos"
     putStrLn "5 - Atualizar contato Adm"
-    putStrLn "4 - listar resumo de atendimentos"
 
     opcao <- getLine
     opcaoAdm opcao
@@ -62,16 +61,10 @@ menuAdm = do
 opcaoAdm :: String -> IO()
 opcaoAdm x
     | x == "1" = verClientesCadastrados
-<<<<<<< HEAD
     | x == "2" = removerCliente
     | x == "3" = alterarDisponibilidadeHotelzinho
     | x == "4" = listarResumoDeAtendimentos
     | x == "5" = atualizarContatoAdm
-=======
-    | x == "2" = alterarDisponibilidadeHotelzinho
-    | x == "3" = listarResumoDeAtendimentos
-    | x == "4" = atualizarContatoAdm
->>>>>>> 37bd430e4aaa190529afa1ac19c3428c08cfc8cf
     | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO()
@@ -130,10 +123,6 @@ mudaContato = do
     hClose file
     menuAdm
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 37bd430e4aaa190529afa1ac19c3428c08cfc8cf
 menuCliente :: IO()
 menuCliente = do
     putStrLn "\nSelecione uma das opções abaixo:"
