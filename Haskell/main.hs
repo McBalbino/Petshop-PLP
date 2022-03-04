@@ -124,11 +124,11 @@ removerCliente:: IO()
 removerCliente = do 
     putStrLn "\nInsira o email do cliente a ser removido:"
     email <- getLine
-    fileExists <- doesFileExist (email ++ ".txt")
+    fileExists <- doesFileExist ("./clientes/" ++ email ++ ".txt")
     if not fileExists then do
         putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
     else do
-        removeFile (email ++ ".txt")
+        removeFile ("./clientes/" ++ email ++ ".txt")
         putStrLn ("\nCliente com email: '" ++ email ++ "' removido com sucesso!")
     showMenu
     
@@ -137,15 +137,20 @@ cadastrarComoCliente :: IO()
 cadastrarComoCliente = do
     putStrLn "\nInsira seu email:"
     email <- getLine
-    fileExists <- doesFileExist (email ++ ".txt")
+    fileExists <- doesFileExist ("./clientes/" ++ email ++ ".txt")
     if fileExists
         then do
             putStrLn "Usuario ja existente"
             showMenu
         else do
-            file <- openFile (email ++ ".txt") WriteMode
-            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" email
-            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" " "
+            file <- openFile ("./clientes/" ++ email ++ ".txt") WriteMode
+            clientesCadastrados <- doesFileExist "clientesCadastrados.txt"
+            if not clientesCadastrados then do
+                fileClientesCadastrados <- openFile "clientesCadastrados.txt" WriteMode;
+                hPutStr fileClientesCadastrados email
+                hFlush fileClientesCadastrados
+                hClose fileClientesCadastrados
+            else appendFile "clientesCadastrados.txt" ("\n" ++ email)
 
             putStrLn "\nInsira sua senha:"
             senha <- getLine
