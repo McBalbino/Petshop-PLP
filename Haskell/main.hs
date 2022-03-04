@@ -58,11 +58,6 @@ menuAdm = do
 opcaoAdm :: String -> IO()
 opcaoAdm x
     | x == "1" = verClientesCadastrados
-<<<<<<< Updated upstream
-    | x == "2" = removerCliente
-    | otherwise = invalidOption menuAdm
-
-=======
     | x == "2" = alterarDisponibilidadeHotelzinho
     | x == "3" = listarResumoDeAtendimentos
     | x == "4" = atualizarContatoAdm
@@ -70,11 +65,9 @@ opcaoAdm x
 
 listarResumoDeAtendimentos :: IO()
 listarResumoDeAtendimentos = do
-    file <- openFile "hotelzinho.txt" ReadMode
-    
-    hClose file
-    
-
+    file <- openFile "agendamentos.txt" ReadMode
+    contents <- hGetContents file
+    print (show contents)
 
 alterarDisponibilidadeHotelzinho :: IO ()
 alterarDisponibilidadeHotelzinho = do
@@ -126,8 +119,6 @@ mudaContato = do
     hClose file
     menuAdm
 
->>>>>>> Stashed changes
-
 menuCliente :: IO()
 menuCliente = do
     putStrLn "\nSelecione uma das opções abaixo:"
@@ -151,7 +142,6 @@ segundoMenuCliente = do
 
     opcao <- getLine
     segundaTelaCliente opcao
-
 
 segundaTelaCliente :: String -> IO()
 segundaTelaCliente x
@@ -239,7 +229,7 @@ cadastrarComoCliente = do
             showMenu
     
 
-logarComoCliente :: IO()
+logarComoCliente :: IO() 
 logarComoCliente = do
 
     putStrLn "Insira seu email"
@@ -257,7 +247,7 @@ logarComoCliente = do
 
             if senha == senhaCadastrado then do
                 putStrLn "Login realizado com sucesso"
-                segundoMenuCliente
+                segundoMenuCliente 
     
             else do
                 putStrLn "Nome ou senha incorretos"
