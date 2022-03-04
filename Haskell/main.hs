@@ -20,6 +20,28 @@ import Data.Char ()
 import Control.Monad
 import qualified Data.ByteString.Char8 as B
 
+data Animal = Animal {
+    nomeAnimal :: String,
+    especie :: String,
+    peso :: String,
+    altura :: String,
+    idade :: Int,
+    agendamentos :: [Agendamento]
+} deriving (Read, Show)
+
+data Cliente = Cliente {
+    nomeCliente :: String,
+    email :: String,
+    senha :: String,
+    telefone :: String,
+    animais :: [Animal]
+} deriving (Read, Show)
+
+data Agendamento = Agendamento {
+    date :: String,
+    servicos :: [String],
+    concluido :: Bool
+} deriving (Read, Show)
 
 main :: IO()
 main = do
