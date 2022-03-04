@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE PartialTypeSignatures #-}
 import System.Exit (exitSuccess)
 import System.Directory ( doesFileExist )
 import System.IO
@@ -9,7 +11,7 @@ import System.IO
       openFile,
       hGetContents,
       hPutStr,
-      IOMode(ReadMode, WriteMode) )
+      IOMode(ReadMode, WriteMode, ReadWriteMode) )
 import Control.Exception ()
 import System.IO.Error ()
 import Prelude hiding (catch)
@@ -17,6 +19,38 @@ import Data.List ()
 import Control.Applicative ()
 import Data.Time.Clock ()
 import Data.Char ()
+
+data Admin = Admin {
+    nome :: String,
+    email :: String,
+    senha :: String,
+    telefone :: String
+} deriving (Read, Show, Eq)
+
+data Cliente = Cliente {
+    nomeCliente :: String,
+    emailCliente :: String,
+    senhaCliente :: String,
+    animais :: [Animal]
+} deriving (Read, Show, Eq)
+
+data Animal = Animal {
+    nomeAnimal:: String,
+    especie:: String,
+    peso:: String,
+    altura:: String,
+    idade:: String,
+    saude:: String,
+    agendamentos:: [Agendamento],
+    historico_de_servicos:: String
+} deriving (Read, Show, Eq)
+
+
+data Agendamento = Agendamento {
+    data_de_atendimento:: String,
+    servicos_realizados:: [String],
+    confirmacao_de_conclusao:: [String]
+} deriving (Read, Show, Eq)
 
 
 main :: IO()
@@ -98,29 +132,26 @@ cadastraAnimal = do
 
 cadastrarComoCliente:: IO()
 cadastrarComoCliente = do
-    clienteCadastrado <- doesFileExist "./clientes.txt"
+    putStrLn "\nInsira seu nome:"
+    nome <- getLine
+    putStrLn "\nInsira seu email:"
+    email <- getLine
+    putStrLn "\nInsira sua senha:"
+    senha <- getLine
 
-    if not clienteCadastrado then do
-        putStrLn "\nInsira seu nome:"
-        nome <- getLine
-        putStrLn "\nInsira seu email:"
-        email <- getLine
-        putStrLn "\nInsira sua senha:"
-        senha <- getLine
+    let cliente = Cliente nome email senha []
 
-        file <- openFile "./clientes.txt" WriteMode
-        hPutStr file email
-        hPutStr file " "
-        hPutStr file senha
-        putStrLn "\nCliente cadastrado com sucesso!"
+    clientesCadastrados <- doesFileExist "clientes.txt"
+
+    if not clientesCadastrados then do
+        file <- openFile "clientes.txt" WriteMode
+        hPutStr file (show cliente)
         hFlush file
         hClose file
-        putStrLn ""
-        showMenu
-    
-    else do
-        putStrLn "Cliente já cadastrado"
-        logarComoCliente
+    else appendFile "clientes.txt" ("\n" ++ show cliente) 
+        
+    putStrLn "\nCliente cadastrado com sucesso!"
+    showMenu
 
 logarComoCliente :: IO()
 logarComoCliente = do

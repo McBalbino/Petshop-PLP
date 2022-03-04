@@ -1,0 +1,7 @@
+
+Cliente {nomeCliente = "a", emailCliente = "a", senhaCliente = "a", animais = []}
+Cliente {nomeCliente = "a", emailCliente = "a", senhaCliente = "a", animais = []}
+Cliente {nomeCliente = "a", emailCliente = "a", senhaCliente = "a", animais = []}
+Cliente {nomeCliente = "a", emailCliente = "a", senhaCliente = "a", animais = []}
+Cliente {nomeCliente = "a", emailCliente = "a", senhaCliente = "a", animais = []}
+Cliente {nomeCliente = "a\DELaaaa", emailCliente = "aaaaaaaaaaaaaa@aaaaaaaa.com", senhaCliente = "aaaaaaaaaaaa", animais = []}
