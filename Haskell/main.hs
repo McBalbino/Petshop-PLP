@@ -141,7 +141,8 @@ menuCliente = do
     putStrLn "\nSelecione uma das opções abaixo:"
     putStrLn "1 - Se cadastrar como cliente"
     putStrLn "2 - Logar no sistema como cliente"
-    putStrLn "3 - Voltar ao menu principal"
+    putStrLn "3 - Ver contato do administrador"
+    putStrLn "4 - Voltar ao menu principal"
 
     opcao <- getLine
     opcaoCliente opcao
@@ -150,7 +151,8 @@ opcaoCliente:: String -> IO()
 opcaoCliente x
     | x == "1" = cadastrarComoCliente
     | x == "2" = logarComoCliente
-    | x == "3" = showMenu
+    | x == "3" = verContatoDoAdministrador
+    | x == "4" = showMenu
     | otherwise = invalidOption menuCliente
 
 segundoMenuCliente :: IO()
@@ -279,3 +281,11 @@ logarComoCliente = do
         if op == "s" then do 
             cadastrarComoCliente
         else menuCliente
+
+verContatoDoAdministrador:: IO()
+verContatoDoAdministrador = do
+    file <- openFile "contato.txt" ReadMode
+    contato <- hGetContents file
+    putStrLn contato
+
+    showMenu
