@@ -147,6 +147,7 @@ segundoMenuCliente :: IO()
 segundoMenuCliente = do
     putStrLn "\nSelecione o que deseja como cliente"
     putStrLn "1 - Cadastrar um novo animal"
+    putStrLn "2 - Acessar Hotelzinho Pet"
     putStrLn "x - Retornar para o menu\n"
 
     opcao <- getLine
@@ -155,6 +156,7 @@ segundoMenuCliente = do
 segundaTelaCliente :: String -> IO()
 segundaTelaCliente x
     | x == "1" = cadastraAnimal
+    | x == "2" = menuHotelzinhoPet
     | otherwise = invalidOption menuCliente
 
 cadastraAnimal :: IO()
@@ -265,3 +267,55 @@ logarComoCliente = do
     else do
         putStrLn "Cliente não cadastrado. Por favor, cadastre-se"
         cadastrarComoCliente
+
+
+
+
+menuHotelzinhoPet :: IO()
+menuHotelzinhoPet = do
+    putStrLn "O Hotelzinho Pet é o serviço de hospedagem de animaizinhos!"
+    putStrLn "Você deseja hospedar algum animalzinho no nosso serviço?"
+    putStrLn "1 - Agendar animal"
+    putStrLn "Caso não tenha interesse, prima qualquer outra tecla"
+
+    opcao <- getLine
+    segundaOpcaoHotelzinho opcao
+
+segundaOpcaoHotelzinho :: String -> IO()
+segundaOpcaoHotelzinho x
+    | x == "1" = agendaHotelzinho
+    | otherwise = invalidOption menuAdm
+
+agendaHotelzinho :: IO()
+agendaHotelzinho = do
+    
+    file <- openFile "agendamentos.txt" ReadMode
+    disponibilidade <- hGetContents file
+    
+    if  disponibilidade == "disponível"
+        then do
+            file <- openFile "hotelzinho.txt" WriteMode
+            putStrLn "\nInsira a especie do animalzinho a ser hospedado: "
+            especie <- getLine
+            putStrLn "\nInsira o nome do animalzinho "
+            nome <- getLine
+            putStrLn "\nQual o período de tempo que o animalzinho vai ficar hospedado?: "
+            tempo <- getLine
+            file <- appendFile "animais.txt" "especie: "
+            file <- appendFile "animais.txt" especie
+            file <- appendFile "animais.txt" "; "
+            file <- appendFile "animais.txt" "nome: "
+            file <- appendFile "animais.txt" nome
+            file <- appendFile "animais.txt" "; "
+            file <- appendFile "animais.txt" "período de tempo: "
+            file <- appendFile "animais.txt" tempo
+            file <- appendFile "animais.txt" "\n"
+            putStrLn "\nAnimal agendado com sucesso"
+            putStrLn ""
+            showMenu
+
+
+    else do
+        putStrLn "Infelizmente o serviço de hotelzinho não está disponível para receber animaizinhos no momento."
+
+    
