@@ -51,6 +51,10 @@ menuAdm = do
     putStrLn "\nSelecione uma das opções abaixo:"
     putStrLn "1 - Ver usuários cadastrados no sistema"
     putStrLn "2 - Remover usuários"
+    putStrLn "3 - Alterar disponibilidade hotelzinho"
+    putStrLn "4 - listar resumo de atendimentos"
+    putStrLn "5 - Atualizar contato Adm"
+    putStrLn "4 - listar resumo de atendimentos"
 
     opcao <- getLine
     opcaoAdm opcao
@@ -58,14 +62,10 @@ menuAdm = do
 opcaoAdm :: String -> IO()
 opcaoAdm x
     | x == "1" = verClientesCadastrados
-<<<<<<< Updated upstream
     | x == "2" = removerCliente
-    | otherwise = invalidOption menuAdm
-
-=======
-    | x == "2" = alterarDisponibilidadeHotelzinho
-    | x == "3" = listarResumoDeAtendimentos
-    | x == "4" = atualizarContatoAdm
+    | x == "3" = alterarDisponibilidadeHotelzinho
+    | x == "4" = listarResumoDeAtendimentos
+    | x == "5" = atualizarContatoAdm
     | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO()
@@ -126,7 +126,6 @@ mudaContato = do
     hClose file
     menuAdm
 
->>>>>>> Stashed changes
 
 menuCliente :: IO()
 menuCliente = do
