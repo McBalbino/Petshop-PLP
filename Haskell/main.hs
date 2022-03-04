@@ -1,5 +1,5 @@
 import System.Exit (exitSuccess)
-import System.Directory ( doesFileExist )
+import System.Directory ( doesFileExist, removeFile )
 import System.IO
     ( IO,
       getLine,
@@ -50,6 +50,7 @@ menuAdm :: IO()
 menuAdm = do
     putStrLn "\nSelecione uma das opções abaixo:"
     putStrLn "1 - Ver usuários cadastrados no sistema"
+    putStrLn "2 - Remover usuários"
 
     opcao <- getLine
     opcaoAdm opcao
@@ -57,6 +58,7 @@ menuAdm = do
 opcaoAdm :: String -> IO()
 opcaoAdm x
     | x == "1" = verClientesCadastrados
+    | x == "2" = removerCliente
     | otherwise = invalidOption menuAdm
 
 
@@ -117,6 +119,18 @@ verClientesCadastrados = do
     file <- openFile "clientesCadastrados.txt" ReadMode
     contents <- hGetContents file
     print (show contents)
+
+removerCliente:: IO()
+removerCliente = do 
+    putStrLn "\nInsira o email do cliente a ser removido:"
+    email <- getLine
+    fileExists <- doesFileExist (email ++ ".txt")
+    if not fileExists then do
+        putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
+    else do
+        removeFile (email ++ ".txt")
+        putStrLn ("\nCliente com email: '" ++ email ++ "' removido com sucesso!")
+    showMenu
     
 
 cadastrarComoCliente :: IO()
