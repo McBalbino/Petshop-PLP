@@ -58,9 +58,75 @@ menuAdm = do
 opcaoAdm :: String -> IO()
 opcaoAdm x
     | x == "1" = verClientesCadastrados
+<<<<<<< Updated upstream
     | x == "2" = removerCliente
     | otherwise = invalidOption menuAdm
 
+=======
+    | x == "2" = alterarDisponibilidadeHotelzinho
+    | x == "3" = listarResumoDeAtendimentos
+    | x == "4" = atualizarContatoAdm
+    | otherwise = invalidOption menuAdm
+
+listarResumoDeAtendimentos :: IO()
+listarResumoDeAtendimentos = do
+    file <- openFile "hotelzinho.txt" ReadMode
+    
+    hClose file
+    
+
+
+alterarDisponibilidadeHotelzinho :: IO ()
+alterarDisponibilidadeHotelzinho = do
+    putStrLn "\nSelecione qual a disponibilidade do hotelzinho neste momento:"
+    putStrLn "1 - Hotelzinho está disponível"
+    putStrLn "2 - Hotelzinho NÃO está disponível"
+
+    opcao <- getLine
+    opcaoHotelzinho opcao
+
+opcaoHotelzinho:: String -> IO()
+opcaoHotelzinho x
+    | x == "1" = ativaHotelzinho
+    | x == "2" = desativaHotelzinho
+    | otherwise = invalidOption alterarDisponibilidadeHotelzinho
+
+ativaHotelzinho:: IO()
+ativaHotelzinho = do
+    file <- openFile "hotelzinho.txt" WriteMode
+    hPutStr file "disponível"
+    hClose file
+
+desativaHotelzinho:: IO()
+desativaHotelzinho = do
+    file <- openFile "hotelzinho.txt" WriteMode
+    hPutStr file "indisponível"
+    hClose file
+
+
+atualizarContatoAdm:: IO()
+atualizarContatoAdm = do
+    putStrLn "\nTem certeza que deseja atualizar o contato do Administrador?"
+    putStrLn "\n--Aperte 1 para continuar--"
+    opcao <- getLine
+    opcaoContato opcao
+
+opcaoContato:: String -> IO()
+opcaoContato x
+    | x == "1" = mudaContato
+    | otherwise = invalidOption menuAdm
+
+mudaContato :: IO()
+mudaContato = do
+    putStrLn "\nInsira o novo número para contato abaixo"
+
+    numero <- getLine
+    file <- openFile "contato.txt" WriteMode
+    hPutStr file numero
+    hClose file
+    menuAdm
+
+>>>>>>> Stashed changes
 
 menuCliente :: IO()
 menuCliente = do
