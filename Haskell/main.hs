@@ -1,5 +1,5 @@
 import System.Exit (exitSuccess)
-import System.Directory ( doesFileExist )
+import System.Directory ( doesFileExist, removeFile )
 import System.IO
     ( IO,
       getLine,
@@ -50,6 +50,7 @@ menuAdm :: IO()
 menuAdm = do
     putStrLn "\nSelecione uma das opções abaixo:"
     putStrLn "1 - Ver usuários cadastrados no sistema"
+    putStrLn "2 - Remover usuários"
 
     opcao <- getLine
     opcaoAdm opcao
@@ -57,6 +58,7 @@ menuAdm = do
 opcaoAdm :: String -> IO()
 opcaoAdm x
     | x == "1" = verClientesCadastrados
+    | x == "2" = removerCliente
     | otherwise = invalidOption menuAdm
 
 
@@ -101,14 +103,25 @@ cadastraAnimal = do
     altura <- getLine
     putStrLn "\nInsira o peso do animal: "
     peso <- getLine
-    file <- openFile "animais.txt" WriteMode
-    hPutStr file nome
-    hPutStr file especie
-    hPutStr file altura
-    hPutStr file peso
+    putStrLn "\nInsira a idade do animal: "
+    idade <- getLine
+    file <- appendFile "animais.txt" "nome: "
+    file <- appendFile "animais.txt" nome
+    file <- appendFile "animais.txt" "; "
+    file <- appendFile "animais.txt" "especie: "
+    file <- appendFile "animais.txt" especie
+    file <- appendFile "animais.txt" "; "
+    file <- appendFile "animais.txt" "altura: "
+    file <- appendFile "animais.txt" altura
+    file <- appendFile "animais.txt" "; "
+    file <- appendFile "animais.txt" "peso: "
+    file <- appendFile "animais.txt" peso
+    file <- appendFile "animais.txt" "; "
+    file <- appendFile "animais.txt" "idade: "
+    file <- appendFile "animais.txt" idade
+    file <- appendFile "animais.txt" "; "
+    file <- appendFile "animais.txt" "\n"
     putStrLn "\nAnimal cadastrado com sucesso"
-    hFlush file
-    hClose file
     putStrLn ""
     showMenu
 
@@ -117,21 +130,38 @@ verClientesCadastrados = do
     file <- openFile "clientesCadastrados.txt" ReadMode
     contents <- hGetContents file
     print (show contents)
+
+removerCliente:: IO()
+removerCliente = do 
+    putStrLn "\nInsira o email do cliente a ser removido:"
+    email <- getLine
+    fileExists <- doesFileExist ("./clientes/" ++ email ++ ".txt")
+    if not fileExists then do
+        putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
+    else do
+        removeFile ("./clientes/" ++ email ++ ".txt")
+        putStrLn ("\nCliente com email: '" ++ email ++ "' removido com sucesso!")
+    showMenu
     
 
 cadastrarComoCliente :: IO()
 cadastrarComoCliente = do
     putStrLn "\nInsira seu email:"
     email <- getLine
-    fileExists <- doesFileExist (email ++ ".txt")
+    fileExists <- doesFileExist ("./clientes/" ++ email ++ ".txt")
     if fileExists
         then do
             putStrLn "Usuario ja existente"
             showMenu
         else do
-            file <- openFile (email ++ ".txt") WriteMode
-            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" email
-            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" " "
+            file <- openFile ("./clientes/" ++ email ++ ".txt") WriteMode
+            clientesCadastrados <- doesFileExist "clientesCadastrados.txt"
+            if not clientesCadastrados then do
+                fileClientesCadastrados <- openFile "clientesCadastrados.txt" WriteMode;
+                hPutStr fileClientesCadastrados email
+                hFlush fileClientesCadastrados
+                hClose fileClientesCadastrados
+            else appendFile "clientesCadastrados.txt" ("\n" ++ email)
 
             putStrLn "\nInsira sua senha:"
             senha <- getLine
@@ -148,13 +178,13 @@ logarComoCliente = do
 
     putStrLn "Insira seu email"
     email <- getLine
-    fileExists <- doesFileExist (email ++ ".txt")
+    fileExists <- doesFileExist ("./clientes/" ++ email ++ ".txt")
 
     if fileExists
         then do
             putStrLn "Insira sua senha"
             senha <- getLine
-            file <- openFile (email ++ ".txt") ReadMode
+            file <- openFile ("./clientes/" ++ email ++ ".txt") ReadMode
             senhaCadastrado <- hGetContents file
 
             putStrLn senhaCadastrado

@@ -1,0 +1,3 @@
+nome: bentinho; especie: cachorro; altura: 155; peso: 15; idade: 5; 
+nome: george; especie: gato; altura: 133; peso: 10; idade: 8; 
+nome: felipe; especie: iguana; altura: 67; peso: 5; idade: 4; 
