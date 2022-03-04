@@ -17,6 +17,8 @@ import Data.List ()
 import Control.Applicative ()
 import Data.Time.Clock ()
 import Data.Char ()
+import Control.Monad
+import qualified Data.ByteString.Char8 as B
 
 
 main :: IO()
@@ -29,13 +31,13 @@ showMenu:: IO()
 showMenu = do
     putStrLn "1 - Sou Administrador"
     putStrLn "2 - Sou Cliente"
-    putStrLn "3 - Sair"
 
     opcao <- getLine
     menus opcao
 
 menus :: String -> IO()
 menus x
+    | x == "1" = menuAdm
     | x == "2" = menuCliente
     | otherwise = invalidOption showMenu
 
@@ -43,6 +45,20 @@ invalidOption :: IO() -> IO()
 invalidOption f = do
         putStrLn "Selecione uma alternativa válida"
         f
+
+menuAdm :: IO()
+menuAdm = do
+    putStrLn "\nSelecione uma das opções abaixo:"
+    putStrLn "1 - Ver usuários cadastrados no sistema"
+
+    opcao <- getLine
+    opcaoAdm opcao
+
+opcaoAdm :: String -> IO()
+opcaoAdm x
+    | x == "1" = verClientesCadastrados
+    | otherwise = invalidOption menuAdm
+
 
 menuCliente :: IO()
 menuCliente = do
@@ -96,61 +112,61 @@ cadastraAnimal = do
     putStrLn ""
     showMenu
 
-cadastrarComoCliente:: IO()
-cadastrarComoCliente = do
-    clienteCadastrado <- doesFileExist "./clientes.txt"
-
-    if not clienteCadastrado then do
-        putStrLn "\nInsira seu nome:"
-        nome <- getLine
-        putStrLn "\nInsira seu email:"
-        email <- getLine
-        putStrLn "\nInsira sua senha:"
-        senha <- getLine
-
-        file <- openFile "./clientes.txt" WriteMode
-        hPutStr file email
-        hPutStr file " "
-        hPutStr file senha
-        putStrLn "\nCliente cadastrado com sucesso!"
-        hFlush file
-        hClose file
-        putStrLn ""
-        showMenu
+verClientesCadastrados :: IO()
+verClientesCadastrados = do
+    file <- openFile "clientesCadastrados.txt" ReadMode
+    contents <- hGetContents file
+    print (show contents)
     
-    else do
-        putStrLn "Cliente já cadastrado"
-        logarComoCliente
+
+cadastrarComoCliente :: IO()
+cadastrarComoCliente = do
+    putStrLn "\nInsira seu email:"
+    email <- getLine
+    fileExists <- doesFileExist (email ++ ".txt")
+    if fileExists
+        then do
+            putStrLn "Usuario ja existente"
+            showMenu
+        else do
+            file <- openFile (email ++ ".txt") WriteMode
+            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" email
+            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" " "
+
+            putStrLn "\nInsira sua senha:"
+            senha <- getLine
+            hPutStr file senha
+            putStrLn "\nCliente cadastrado com sucesso!"
+            hFlush file
+            hClose file
+            putStrLn ""
+            showMenu
+    
 
 logarComoCliente :: IO()
 logarComoCliente = do
-    clienteCadastrado <- doesFileExist "clientes.txt"
 
-    if clienteCadastrado then do
-        putStrLn "Insira seu email"
-        email <- getLine
-        putStrLn "Insira sua senha"
-        senha <- getLine
-        file <- openFile "clientes.txt" ReadMode
-        senhaCadastrado <- hGetContents file
+    putStrLn "Insira seu email"
+    email <- getLine
+    fileExists <- doesFileExist (email ++ ".txt")
 
-        putStrLn senhaCadastrado
+    if fileExists
+        then do
+            putStrLn "Insira sua senha"
+            senha <- getLine
+            file <- openFile (email ++ ".txt") ReadMode
+            senhaCadastrado <- hGetContents file
 
-        if senha == senhaCadastrado then do
-            putStrLn "Login realizado com sucesso"
-            segundoMenuCliente
-        
-        else do
-            putStrLn "Nome ou senha incorretos"
-            menuCliente
-        hClose file
+            putStrLn senhaCadastrado
+
+            if senha == senhaCadastrado then do
+                putStrLn "Login realizado com sucesso"
+                segundoMenuCliente
     
+            else do
+                putStrLn "Nome ou senha incorretos"
+                menuCliente
+            hClose file
     else do
         putStrLn "Cliente não cadastrado. Por favor, cadastre-se"
         cadastrarComoCliente
-
-
-
-
-
-    
