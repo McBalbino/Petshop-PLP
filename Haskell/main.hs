@@ -24,13 +24,15 @@ import qualified Data.ByteString.Char8 as B
 main :: IO()
 main = do
     putStrLn "Boas vindas!"
-    putStrLn "Selecione uma das opções abaixo:\n"
     showMenu
 
 showMenu:: IO()
 showMenu = do
+    putStrLn "\nSelecione uma das opções abaixo:\n"
+
     putStrLn "1 - Sou Administrador"
     putStrLn "2 - Sou Cliente"
+    putStrLn "3 - Sair"
 
     opcao <- getLine
     menus opcao
@@ -39,7 +41,11 @@ menus :: String -> IO()
 menus x
     | x == "1" = menuAdm
     | x == "2" = menuCliente
+    | x == "3" = encerrarSessao
     | otherwise = invalidOption showMenu
+
+encerrarSessao:: IO()
+encerrarSessao = putStrLn "Saindo... Até a próxima!" 
 
 invalidOption :: IO() -> IO()
 invalidOption f = do
@@ -54,6 +60,7 @@ menuAdm = do
     putStrLn "3 - Alterar disponibilidade hotelzinho"
     putStrLn "4 - listar resumo de atendimentos"
     putStrLn "5 - Atualizar contato Adm"
+    putStrLn "6 - Voltar"
 
     opcao <- getLine
     opcaoAdm opcao
@@ -65,6 +72,7 @@ opcaoAdm x
     | x == "3" = alterarDisponibilidadeHotelzinho
     | x == "4" = listarResumoDeAtendimentos
     | x == "5" = atualizarContatoAdm
+    | x == "6" = showMenu
     | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO()
@@ -133,6 +141,8 @@ menuCliente = do
     putStrLn "\nSelecione uma das opções abaixo:"
     putStrLn "1 - Se cadastrar como cliente"
     putStrLn "2 - Logar no sistema como cliente"
+    putStrLn "3 - Ver contato do administrador"
+    putStrLn "4 - Voltar ao menu principal"
 
     opcao <- getLine
     opcaoCliente opcao
@@ -141,6 +151,8 @@ opcaoCliente:: String -> IO()
 opcaoCliente x
     | x == "1" = cadastrarComoCliente
     | x == "2" = logarComoCliente
+    | x == "3" = verContatoDoAdministrador
+    | x == "4" = showMenu
     | otherwise = invalidOption menuCliente
 
 segundoMenuCliente :: IO()
@@ -319,3 +331,17 @@ agendaHotelzinho = do
         putStrLn "Infelizmente o serviço de hotelzinho não está disponível para receber animaizinhos no momento."
 
     
+        putStrLn "Cliente não cadastrado."
+        putStrLn "Deseja fazer o cadastro agora? (s/n):"
+        op <- getLine;
+        if op == "s" then do 
+            cadastrarComoCliente
+        else menuCliente
+
+verContatoDoAdministrador:: IO()
+verContatoDoAdministrador = do
+    file <- openFile "contato.txt" ReadMode
+    contato <- hGetContents file
+    putStrLn contato
+
+    showMenu
