@@ -93,12 +93,16 @@ ativaHotelzinho = do
     file <- openFile "hotelzinho.txt" WriteMode
     hPutStr file "disponível"
     hClose file
+    putStrLn "Hotelzinho foi configurado como disponível"
+    menuAdm
 
 desativaHotelzinho:: IO()
 desativaHotelzinho = do
     file <- openFile "hotelzinho.txt" WriteMode
     hPutStr file "indisponível"
     hClose file
+    putStrLn "Hotelzinho foi configurado como indisponível"
+    menuAdm
 
 
 atualizarContatoAdm:: IO()
@@ -121,6 +125,7 @@ mudaContato = do
     file <- openFile "contato.txt" WriteMode
     hPutStr file numero
     hClose file
+    putStrLn "\nContato atualizado com sucesso!"
     menuAdm
 
 menuCliente :: IO()
