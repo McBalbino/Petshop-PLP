@@ -1,297 +1,311 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
-import System.Exit (exitSuccess)
-import System.Directory ( doesFileExist, removeFile )
-import System.IO
-    ( IO,
-      getLine,
-      putStrLn,
-      hClose,
-      hFlush,
-      openFile,
-      hGetContents,
-      hPutStr,
-      IOMode(ReadMode, WriteMode), hGetLine )
-import Control.Exception ()
-import System.IO.Error ()
-import Prelude hiding (catch)
-import Data.List ()
+
 import Control.Applicative ()
-import Data.Time.Clock ()
-import Data.Char ()
+import Control.Exception ()
 import Control.Monad
 import qualified Data.ByteString.Char8 as B
+import Data.Char ()
+import Data.List ()
+import Data.Time.Clock ()
+import System.Directory (doesFileExist, removeFile)
+import System.Exit (exitSuccess)
+import System.IO
+  ( IO,
+    IOMode (ReadMode, ReadWriteMode, WriteMode),
+    getLine,
+    hClose,
+    hFlush,
+    hGetContents,
+    hGetLine,
+    hPutStr,
+    openFile,
+    putStrLn,
+  )
+import System.IO.Error ()
+import Prelude hiding (catch)
+import Distribution.PackageDescription (CondTree(condTreeComponents))
 
-data Animal = Animal {
-    nomeAnimal :: String,
+data Animal = Animal
+  { nomeAnimal :: String,
+    emailCliente :: String,
     especie :: String,
     peso :: String,
     altura :: String,
-    idade :: Int,
-    agendamentos :: [Agendamento]
-} deriving (Read, Show)
+    idade :: String
+  }
+  deriving (Read, Show)
 
-data Cliente = Cliente {
-    nomeCliente :: String,
+data Cliente = Cliente
+  { nomeCliente :: String,
     email :: String,
     senha :: String,
-    telefone :: String,
-    animais :: [Animal]
-} deriving (Read, Show)
+    telefone :: String
+  }
+  deriving (Read, Show)
 
-data Agendamento = Agendamento {
-    date :: String,
+data Agendamento = Agendamento
+  { date :: String,
     servicos :: [String],
-    concluido :: Bool
-} deriving (Read, Show)
+    concluido :: Bool,
+    animal :: String
+  }
+  deriving (Read, Show)
 
-main :: IO()
-main = do
-    putStrLn "Boas vindas!"
-    putStrLn "Selecione uma das opções abaixo:\n"
-    showMenu
-
-showMenu:: IO()
-showMenu = do
-    putStrLn "1 - Sou Administrador"
-    putStrLn "2 - Sou Cliente"
-
-    opcao <- getLine
-    menus opcao
-
-menus :: String -> IO()
-menus x
-    | x == "1" = menuAdm
-    | x == "2" = menuCliente
-    | otherwise = invalidOption showMenu
-
-invalidOption :: IO() -> IO()
-invalidOption f = do
-        putStrLn "Selecione uma alternativa válida"
-        f
-
-menuAdm :: IO()
-menuAdm = do
-    putStrLn "\nSelecione uma das opções abaixo:"
-    putStrLn "1 - Ver usuários cadastrados no sistema"
-    putStrLn "2 - Remover usuários"
-
-    opcao <- getLine
-    opcaoAdm opcao
-
-opcaoAdm :: String -> IO()
-opcaoAdm x
-    | x == "1" = verClientesCadastrados
-    | x == "2" = removerCliente
-    | otherwise = invalidOption menuAdm
-
-
-menuCliente :: IO()
-menuCliente = do
-    putStrLn "\nSelecione uma das opções abaixo:"
-    putStrLn "1 - Se cadastrar como cliente"
-    putStrLn "2 - Logar no sistema como cliente"
-
-    opcao <- getLine
-    opcaoCliente opcao
-
-opcaoCliente:: String -> IO()
-opcaoCliente x
-    | x == "1" = cadastrarComoCliente2
-    | x == "2" = logarComoCliente
-    | otherwise = invalidOption menuCliente
-
-segundoMenuCliente :: IO()
-segundoMenuCliente = do
-    putStrLn "\nSelecione o que deseja como cliente"
-    putStrLn "1 - Cadastrar um novo animal"
-    putStrLn "x - Retornar para o menu\n"
-
-    opcao <- getLine
-    segundaTelaCliente opcao
-
-
-segundaTelaCliente :: String -> IO()
-segundaTelaCliente x
-    | x == "1" = cadastraAnimal
-    | otherwise = invalidOption menuCliente
-
-indexCliente :: [Cliente] -> String -> Int -> Int
-indexCliente (c:cs) email i
-    | obterEmail c == email = i
-    | obterEmail c /= email = next
-    where next = indexCliente cs email (i + 1)
-
-toStringList :: [Cliente] -> String
-toStringList (x:xs) = show x ++ "\n" ++ toStringList xs
-toStringList [] = ""
-
-
-cadastraAnimal :: IO()
-cadastraAnimal = do
-    putStrLn "\nInsira seu email: "
-    email <- getLine
-
-    file <- openFile "clientes.txt" ReadMode
-    contents <- hGetContents file
-    hClose file
-
-    let clientes = lines contents
-    let clientesObj = [read x :: Cliente | x <- clientes]
-    let index = indexCliente clientesObj email 0
-
-    let cliente = clientesObj !! index
-
-    putStrLn "\nInsira o nome do animal: "
-    nome <- getLine
-    putStrLn "\nInsira a especie do animal: "
-    especie <- getLine
-    putStrLn "\nInsira a altura do animal: "
-    altura <- getLine
-    putStrLn "\nInsira o peso do animal: "
-    peso <- getLine
-    putStrLn ""
-
-    salvarAnimal (toStringList (cliente:clientesObj))
-
-
-salvarAnimal :: String -> IO ()
-salvarAnimal dados = do
-    print(dados)
-    -- filex <- openFile "clientes.txt" WriteMode 
-    -- hPutStr filex dados
-    -- hFlush filex
-    -- hClose filex
-    showMenu
+obterCliente :: Cliente -> String -> String
+obterCliente Cliente {nomeCliente=n, email=e, senha=s, telefone=t} prop
+    | prop == "nomeCliente" = n
+    | prop == "email" = e
+    | prop == "senha" = s
+    | prop == "telefone" = t
 
 editCliente :: Cliente -> Animal -> Cliente
-editCliente (Cliente n e s t as) a = Cliente {nomeCliente=n,email=e,senha=s,telefone=t, animais=a:as}
+editCliente Cliente {nomeCliente = n, email = e, senha = s, telefone = t} a = Cliente {nomeCliente = n, email = e, senha = s, telefone = t}
 
-verClientesCadastrados :: IO()
-verClientesCadastrados = do
-    file <- openFile "clientesCadastrados.txt" ReadMode
+obterAnimal :: Animal -> String -> String
+obterAnimal Animal {nomeAnimal=n, emailCliente=ec, especie=e, peso=p, altura=a, idade=i} prop
+    | prop == "nomeAnimal" = n
+    | prop == "emailCliente" = ec
+    | prop == "especie" = e
+    | prop == "peso" = p
+    | prop == "altura" = a
+    | prop == "idade" = i
+
+main :: IO ()
+main = do
+  putStrLn "Boas vindas!"
+  putStrLn "Selecione uma das opções abaixo:\n"
+  showMenu
+
+showMenu :: IO ()
+showMenu = do
+  putStrLn "1 - Sou Administrador"
+  putStrLn "2 - Sou Cliente"
+
+  opcao <- getLine
+  menus opcao
+
+menus :: String -> IO ()
+menus x
+  | x == "1" = menuAdm
+  | x == "2" = menuCliente
+  | otherwise = invalidOption showMenu
+
+invalidOption :: IO () -> IO ()
+invalidOption f = do
+  putStrLn "Selecione uma alternativa válida"
+  f
+
+menuAdm :: IO ()
+menuAdm = do
+  putStrLn "\nSelecione uma das opções abaixo:"
+  putStrLn "1 - Ver usuários cadastrados no sistema"
+  putStrLn "2 - Remover usuários"
+
+  opcao <- getLine
+  opcaoAdm opcao
+
+opcaoAdm :: String -> IO ()
+opcaoAdm x
+  | x == "1" = verClientesCadastrados
+  | x == "2" = removerCliente
+  | otherwise = invalidOption menuAdm
+
+menuCliente :: IO ()
+menuCliente = do
+  putStrLn "\nSelecione uma das opções abaixo:"
+  putStrLn "1 - Se cadastrar como cliente"
+  putStrLn "2 - Logar no sistema como cliente"
+
+  opcao <- getLine
+  opcaoCliente opcao
+
+opcaoCliente :: String -> IO ()
+opcaoCliente x
+  | x == "1" = cadastrarComoCliente
+  | x == "2" = logarComoCliente
+  | otherwise = invalidOption menuCliente
+
+segundoMenuCliente :: String -> IO ()
+segundoMenuCliente email = do
+  putStrLn "\nSelecione o que deseja como cliente"
+  putStrLn "1 - Cadastrar um novo animal"
+  putStrLn "2 - Listar animais cadastrados"
+  putStrLn "x - Retornar para o menu\n"
+
+  opcao <- getLine
+  segundaTelaCliente opcao email
+
+segundaTelaCliente :: String -> String -> IO ()
+segundaTelaCliente x email
+  | x == "1" = cadastraAnimal email
+  | x == "2" = listarAnimais email
+  | otherwise = invalidOption menuCliente
+
+indexCliente :: [Cliente] -> String -> Int -> Int
+indexCliente (c : cs) email i
+  | obterCliente c "email" == email = i
+  | obterCliente c "email" /= email = next
+  where
+    next = indexCliente cs email (i + 1)
+
+converterEmAnimal a = read a :: Animal
+
+listarAnimais :: String -> IO()
+listarAnimais emailCliente = do
+    file <- openFile "animais.txt" ReadMode
     contents <- hGetContents file
-    print (show contents)
 
-removerCliente:: IO()
-removerCliente = do
-    putStrLn "\nInsira o email do cliente a ser removido:"
-    email <- getLine
-    fileExists <- doesFileExist (email ++ ".txt")
-    if not fileExists then do
-        putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
-    else do
-        removeFile (email ++ ".txt")
-        putStrLn ("\nCliente com email: '" ++ email ++ "' removido com sucesso!")
+    let animaisStr = lines contents
+    let animais = map converterEmAnimal animaisStr
+
+    mostrarAnimaisDoCliente emailCliente animais
     showMenu
 
-
-cadastrarComoCliente :: IO()
-cadastrarComoCliente = do
-    putStrLn "\nInsira seu email:"
-    email <- getLine
-    fileExists <- doesFileExist (email ++ ".txt")
-    if fileExists
+mostrarAnimaisDoCliente :: String -> [Animal] -> IO()
+mostrarAnimaisDoCliente emailCliente [] = do
+    putStrLn ""
+mostrarAnimaisDoCliente emailCliente (a:as) = do
+    if obterAnimal a "emailCliente" /= emailCliente
         then do
-            putStrLn "Usuario ja existente"
-            showMenu
-        else do
-            file <- openFile (email ++ ".txt") WriteMode
-            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" email
-            fileClientesCadastrados <- appendFile "clientesCadastrados.txt" " "
+            mostrarAnimaisDoCliente emailCliente as
+    else do
+        putStrLn ("Nome: " ++ obterAnimal a "nomeAnimal")
+        putStrLn ("Especie: " ++ obterAnimal a "especie")
+        putStrLn ("Peso: " ++ obterAnimal a "peso")
+        putStrLn ("Altura: " ++ obterAnimal a "altura")
+        putStrLn ("Idade: " ++ obterAnimal a "idade" ++ "\n")
+        mostrarAnimaisDoCliente emailCliente as
 
-            putStrLn "\nInsira sua senha:"
-            senha <- getLine
-            hPutStr file senha
-            putStrLn "\nCliente cadastrado com sucesso!"
-            hFlush file
-            hClose file
-            putStrLn ""
-            showMenu
 
-obterEmail :: Cliente -> String
-obterEmail Cliente {nomeCliente=c, email=e, senha=s, telefone=t, animais=[]} = e
+toStringListCliente :: [Cliente] -> String
+toStringListCliente (x : xs) = show x ++ "\n" ++ toStringListCliente xs
+toStringListCliente [] = ""
 
-obterSenha :: Cliente -> String
-obterSenha (Cliente _ _ senha _ _) = senha
+toCliente c = read c :: Cliente
+
+toObjListCliente :: [String] -> [Cliente]
+toObjListCliente = map toCliente
+
+cadastraAnimal :: String -> IO ()
+cadastraAnimal email = do
+  putStrLn "\nInsira o nome do animal: "
+  nome <- getLine
+  putStrLn "\nInsira a especie do animal: "
+  especie <- getLine
+  putStrLn "\nInsira a altura do animal: "
+  altura <- getLine
+  putStrLn "\nInsira o peso do animal: "
+  peso <- getLine
+  putStrLn "\nInsira o idade do animal: "
+  idade <- getLine
+  putStrLn ""
+
+  let animal = Animal {nomeAnimal = nome, emailCliente = email, peso = peso, altura = altura, especie = especie, idade = idade}
+
+  appendFile "animais.txt" (show animal ++ "\n")
+
+  putStrLn "\nAnimal Cadastrado com sucessos!\n"
+  showMenu
+
+verClientesCadastrados :: IO ()
+verClientesCadastrados = do
+  file <- openFile "clientesCadastrados.txt" ReadMode
+  contents <- hGetContents file
+  print (show contents)
+
+removerCliente :: IO ()
+removerCliente = do
+  putStrLn "\nInsira o email do cliente a ser removido:"
+  email <- getLine
+  fileExists <- doesFileExist (email ++ ".txt")
+  if not fileExists
+    then do
+      putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
+    else do
+      removeFile (email ++ ".txt")
+      putStrLn ("\nCliente com email: '" ++ email ++ "' removido com sucesso!")
+  showMenu
 
 
 encontraCliente' :: [Cliente] -> String -> String -> Bool
-encontraCliente' (c:cs) email ""
-    | obterEmail c == email = True
-    | obterEmail c /= email = encontrar
-    where encontrar = encontraCliente' cs email ""
-
 encontraCliente' [] email senha = False
+-- Procura Cliente somente verificando o email
+encontraCliente' (c : cs) email ""
+  | obterCliente c "email" == email = True
+  | obterCliente c "email" /= email = encontrar
+  where
+    encontrar = encontraCliente' cs email ""
+-- Procura Cliente verificando o email e a senha
+encontraCliente' (c : cs) email senha
+  | obterCliente c "email" == email && obterCliente c "senha" == senha = True
+  | obterCliente c "email" /= email || obterCliente c "senha" /= senha = encontrar
+  where
+    encontrar = encontraCliente' cs email senha
 
-encontraCliente' (c:cs) email senha
-    | obterEmail c == email && obterSenha c == senha = True
-    | obterEmail c /= email || obterSenha c /= senha = encontrar
-    where encontrar = encontraCliente' cs email senha
+cadastrarComoCliente :: IO ()
+cadastrarComoCliente = do
+  putStrLn "\nInsira seu nome:"
+  nome <- getLine
 
-cadastrarComoCliente2 :: IO()
-cadastrarComoCliente2 = do
-    putStrLn "\nInsira seu nome:"
-    nome <- getLine
+  putStrLn "Insira seu email:"
+  email <- getLine
 
-    putStrLn "Insira seu email:"
-    email <- getLine
+  putStrLn "Insira sua senha:"
+  senha <- getLine
 
-    putStrLn "Insira sua senha:"
-    senha <- getLine
+  putStrLn "Insira seu telefone:"
+  telefone <- getLine
 
-    putStrLn "Insira seu telefone:"
-    telefone <- getLine
+  putStrLn ""
 
-    putStrLn ""
+  fileExists <- doesFileExist "clientes.txt"
+  if fileExists
+    then do
+      file <- openFile "clientes.txt" ReadMode
+      contents <- hGetContents file
+      let clientes = lines contents
+      let hasThisClient = encontraCliente' ([read x :: Cliente | x <- clientes]) email ""
 
-    fileExists <- doesFileExist "clientes.txt"
-    if fileExists
+      if hasThisClient
         then do
-            file <- openFile "clientes.txt" ReadMode
-            contents <- hGetContents file
-            let clientes = lines contents
-            let hasThisClient = encontraCliente' ([read x :: Cliente | x <- clientes]) email ""
-
-            if hasThisClient
-                then do
-                    putStrLn "Usuario ja existente"
-                    showMenu
-                else do
-                    criarCliente nome email senha telefone
+          putStrLn "Usuario ja existente"
+          showMenu
         else do
-            criarCliente nome email senha telefone
-
-criarCliente :: String -> String -> String -> String -> IO()
-criarCliente nome email senha telefone = do
-    let cliente = Cliente {nomeCliente=nome, email=email, senha=senha, telefone=telefone, animais=[]}
-    file <- appendFile "clientes.txt" (show cliente ++ "\n")
-    putStrLn "\nCliente cadastrado com sucesso!"
-    putStrLn ""
-    showMenu
-
-logarComoCliente :: IO()
-logarComoCliente = do
-    putStrLn "Insira seu email"
-    email <- getLine
-    fileExists <- doesFileExist "clientes.txt"
-
-    if fileExists
-        then do
-            putStrLn "Insira sua senha"
-            senha <- getLine
-            file <- openFile "clientes.txt" ReadMode
-            contents <- hGetContents file
-            let clientes = lines contents
-            let hasCliente = encontraCliente' [read x :: Cliente | x <- clientes] email senha
-
-            if hasCliente then do
-                putStrLn "Login realizado com sucesso"
-                segundoMenuCliente
-
-            else do
-                putStrLn "Nome ou senha incorretos"
-                menuCliente
-            hClose file
+          criarCliente nome email senha telefone
     else do
-        putStrLn "Nenhum cliente não cadastrado. Por favor, cadastre-se"
-        cadastrarComoCliente2
+      criarCliente nome email senha telefone
+
+criarCliente :: String -> String -> String -> String -> IO ()
+criarCliente nome email senha telefone = do
+  let cliente = Cliente {nomeCliente = nome, email = email, senha = senha, telefone = telefone}
+  file <- appendFile "clientes.txt" (show cliente ++ "\n")
+  putStrLn "\nCliente cadastrado com sucesso!"
+  putStrLn ""
+  showMenu
+
+logarComoCliente :: IO ()
+logarComoCliente = do
+  putStrLn "Insira seu email"
+  email <- getLine
+  fileExists <- doesFileExist "clientes.txt"
+
+  if fileExists
+    then do
+      putStrLn "Insira sua senha"
+      senha <- getLine
+      file <- openFile "clientes.txt" ReadMode
+      contents <- hGetContents file
+      let clientes = lines contents
+      let hasCliente = encontraCliente' [read x :: Cliente | x <- clientes] email senha
+
+      if hasCliente
+        then do
+          putStrLn "Login realizado com sucesso"
+          segundoMenuCliente email
+        else do
+          putStrLn "Nome ou senha incorretos"
+          menuCliente
+      hClose file
+    else do
+      putStrLn "Nenhum cliente não cadastrado. Por favor, cadastre-se"
+      cadastrarComoCliente
