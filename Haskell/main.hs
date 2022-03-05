@@ -209,6 +209,7 @@ segundoMenuCliente email = do
   putStrLn "1 - Cadastrar um novo animal"
   putStrLn "2 - Listar animais cadastrados"
   putStrLn "3 - Acessar Hotelzinho Pet"
+  putStrLn "4 - Remover um animal"
   putStrLn "x - Retornar para o menu\n"
 
   opcao <- getLine
@@ -219,6 +220,7 @@ segundaTelaCliente x email
   | x == "1" = cadastraAnimal email
   | x == "2" = listarAnimais email
   | x == "3" = menuHotelzinhoPet
+  | x == "4" = removerAnimal email
   | otherwise = invalidOption menuCliente
 
 indexCliente :: [Cliente] -> String -> Int -> Int
@@ -329,7 +331,8 @@ atualizaClientes :: [Cliente] -> IO ()
 atualizaClientes [] = putStrLn "Cliente removido com sucesso!\n"
 atualizaClientes (x : xs) = do
   clientesCadastrados <- doesFileExist "clientes.txt"
-  if not clientesCadastrados then do
+  if not clientesCadastrados
+    then do
       file <- openFile "clientes.txt" WriteMode
       hPutStr file (show x)
       hFlush file
@@ -361,13 +364,13 @@ encontraCliente (c : cs) email senha
   where
     encontrar = encontraCliente cs email senha
 
-encontraAnimal :: [Animal] -> String -> Bool
-encontraAnimal [] nome = False
-encontraAnimal (c : cs) nome 
-  | obterAnimal c "nome" == nome = True
-  | obterAnimal c "nome" /= nome = encontrar
+encontraAnimal :: [Animal] -> String -> String -> Bool
+encontraAnimal [] nome emailDonoDoAnimal = False
+encontraAnimal (c : cs) nome emailDonoDoAnimal
+  | obterAnimal c "nomeAnimal" == nome && obterAnimal c "emailCliente" == emailDonoDoAnimal = True
+  | not (obterAnimal c "nomeAnimal" == nome && obterAnimal c "emailCliente" == emailDonoDoAnimal) = encontrar
   where
-    encontrar = encontraAnimal cs nome 
+    encontrar = encontraAnimal cs nome emailDonoDoAnimal
 
 cadastrarComoCliente :: IO ()
 cadastrarComoCliente = do
@@ -496,3 +499,50 @@ verContatoDoAdministrador = do
   putStrLn contato
 
   showMenu
+
+removerAnimal :: String -> IO ()
+removerAnimal emailDonoDoAnimal = do
+  clientesCadastrados <- doesFileExist "animais.txt"
+  if not clientesCadastrados
+    then do
+      putStrLn "Não há animais cadastrados!"
+    else do
+      putStr "\nInsira o nome do animal a ser removido: "
+      nomeAnimal <- getLine
+
+      animaisContent <- readFile "animais.txt"
+      let animais = lines animaisContent
+      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeAnimal emailDonoDoAnimal
+
+      if not hasAnimal
+        then do
+          putStrLn ("\nAnimal de nome: '" ++ nomeAnimal ++ "' não existe!")
+        else do
+          removeFile "animais.txt"
+          let novaListaDeAnimais = [read x :: Animal | x <- animais, not (encontrarAnimalASerRemovido (read x :: Animal) nomeAnimal emailDonoDoAnimal)]
+          atualizaAnimais novaListaDeAnimais
+
+  showMenu
+
+encontrarAnimalASerRemovido:: Animal -> String -> String -> Bool 
+encontrarAnimalASerRemovido animal nomeDoAnimal emailDoDono = do
+  obterNomeDoAnimal animal == nomeDoAnimal && obterEmailDoDonoDoAnimal animal == emailDoDono
+
+atualizaAnimais :: [Animal] -> IO ()
+atualizaAnimais [] = putStrLn "Animal removido com sucesso!\n"
+atualizaAnimais (x : xs) = do
+  animaisCadastrados <- doesFileExist "animais.txt"
+  if not animaisCadastrados
+    then do
+      file <- openFile "animais.txt" WriteMode
+      hPutStr file (show x)
+      hFlush file
+      hClose file
+    else appendFile "animais.txt" ("\n" ++ show x)
+  atualizaAnimais xs
+
+obterNomeDoAnimal :: Animal -> String
+obterNomeDoAnimal (Animal nomeAnimal _ _ _ _ _) = nomeAnimal
+
+obterEmailDoDonoDoAnimal :: Animal -> String
+obterEmailDoDonoDoAnimal (Animal _ email _ _ _ _) = email
