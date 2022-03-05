@@ -363,8 +363,7 @@ encontraCliente (c : cs) email senha
 
 encontraAnimal :: [Animal] -> String -> Bool
 encontraAnimal [] nome = False
--- Procura Animal somente verificando o nome
-encontraAnima (c : cs) nome 
+encontraAnimal (c : cs) nome 
   | obterAnimal c "nome" == nome = True
   | obterAnimal c "nome" /= nome = encontrar
   where
