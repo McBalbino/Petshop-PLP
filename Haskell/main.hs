@@ -19,6 +19,7 @@ import System.IO
     hGetContents,
     hGetLine,
     hPutStr,
+    hPutStrLn,
     openFile,
     putStrLn,
   )
@@ -301,16 +302,40 @@ verClientesCadastrados = do
 
 removerCliente :: IO ()
 removerCliente = do
-  putStrLn "\nInsira o email do cliente a ser removido:"
-  email <- getLine
-  fileExists <- doesFileExist (email ++ ".txt")
-  if not fileExists
+  clientesCadastrados <- doesFileExist "clientes.txt"
+  if not clientesCadastrados
     then do
-      putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
+      putStrLn "Não há clientes cadastrados!"
     else do
-      removeFile (email ++ ".txt")
-      putStrLn ("\nCliente com email: '" ++ email ++ "' removido com sucesso!")
+      putStr "\nInsira o email do cliente a ser removido: "
+      email <- getLine
+
+      file <- openFile "clientes.txt" ReadMode
+      clientesContent <- hGetContents file
+      let clientes = lines clientesContent
+      let hasCliente = encontraCliente [read x :: Cliente | x <- clientes] email ""
+
+      if not hasCliente
+        then do
+          putStrLn ("\nCliente com email: '" ++ email ++ "' não existe!")
+        else do
+          removeFile "clientes.txt"
+          let novaListaDeClientes = [read x :: Cliente | x <- clientes, obterEmail (read x :: Cliente) /= email]
+          atualizaClientes novaListaDeClientes
+
   showMenu
+
+atualizaClientes :: [Cliente] -> IO ()
+atualizaClientes [] = putStrLn "Cliente removido com sucesso!\n"
+atualizaClientes (x : xs) = do
+  clientesCadastrados <- doesFileExist "clientes.txt"
+  if not clientesCadastrados then do
+      file <- openFile "clientes.txt" WriteMode
+      hPutStr file (show x)
+      hFlush file
+      hClose file
+    else appendFile "clientes.txt" ("\n" ++ show x)
+  atualizaClientes xs
 
 obterEmail :: Cliente -> String
 obterEmail Cliente {nomeCliente = c, email = e, senha = s, telefone = t} = e
@@ -321,20 +346,20 @@ obterSenha (Cliente _ _ senha _) = senha
 obterNomes :: Cliente -> String
 obterNomes (Cliente nomeCliente _ _ _) = nomeCliente
 
-encontraCliente' :: [Cliente] -> String -> String -> Bool
-encontraCliente' [] email senha = False
+encontraCliente :: [Cliente] -> String -> String -> Bool
+encontraCliente [] email senha = False
 -- Procura Cliente somente verificando o email
-encontraCliente' (c : cs) email ""
+encontraCliente (c : cs) email ""
   | obterCliente c "email" == email = True
   | obterCliente c "email" /= email = encontrar
   where
-    encontrar = encontraCliente' cs email ""
+    encontrar = encontraCliente cs email ""
 -- Procura Cliente verificando o email e a senha
-encontraCliente' (c : cs) email senha
+encontraCliente (c : cs) email senha
   | obterCliente c "email" == email && obterCliente c "senha" == senha = True
   | obterCliente c "email" /= email || obterCliente c "senha" /= senha = encontrar
   where
-    encontrar = encontraCliente' cs email senha
+    encontrar = encontraCliente cs email senha
 
 cadastrarComoCliente :: IO ()
 cadastrarComoCliente = do
@@ -358,7 +383,7 @@ cadastrarComoCliente = do
       file <- openFile "clientes.txt" ReadMode
       contents <- hGetContents file
       let clientes = lines contents
-      let hasThisClient = encontraCliente' ([read x :: Cliente | x <- clientes]) email ""
+      let hasThisClient = encontraCliente ([read x :: Cliente | x <- clientes]) email ""
 
       if hasThisClient
         then do
@@ -390,7 +415,7 @@ logarComoCliente = do
       file <- openFile "clientes.txt" ReadMode
       contents <- hGetContents file
       let clientes = lines contents
-      let hasCliente = encontraCliente' [read x :: Cliente | x <- clientes] email senha
+      let hasCliente = encontraCliente [read x :: Cliente | x <- clientes] email senha
 
       if hasCliente
         then do
