@@ -222,7 +222,7 @@ segundaTelaCliente x email
   | x == "2" = listarAnimais email
   | x == "3" = menuHotelzinhoPet
   | x == "4" = removerAnimal email
-  | x == "5" = agendaAnimal
+  | x == "5" = agendaAnimal email
   | otherwise = invalidOption menuCliente
 
 indexCliente :: [Cliente] -> String -> Int -> Int
@@ -264,10 +264,11 @@ toStringListCliente :: [Cliente] -> String
 toStringListCliente (x : xs) = show x ++ "\n" ++ toStringListCliente xs
 toStringListCliente [] = ""
 
-toCliente c = read c :: Cliente
+-- toCliente :: String -> Cliente
+-- toCliente c = read c :: Cliente
 
-toObjListCliente :: [String] -> [Cliente]
-toObjListCliente = map toCliente
+-- toObjListCliente :: [String] -> [Cliente]
+-- toObjListCliente = map toCliente
 
 cadastraAnimal :: String -> IO ()
 cadastraAnimal email = do
@@ -293,23 +294,23 @@ cadastraAnimal email = do
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
   showMenu
   
- agendaAnimal :: IO()
- agendaAnimal = do
+agendaAnimal :: String -> IO()
+agendaAnimal email = do
   putStrLn "\nQual será o serviço?"
   putStrLn "1 - Agendar consulta veterinária"
   putStrLn "2 - Agendar banho e tosa"
 
   opcao <- getLine
-  opcaoServico opcao
+  opcaoServico opcao email
 
-opcaoServico:: String -> IO()
-opcaoServico x
-  | x == "1" = agendarConsulta
-  | x == "2" = agendarBanhoTosa
-  | otherwise = invalidOption agendaAnimal
+opcaoServico:: String -> String -> IO()
+opcaoServico x email
+  | x == "1" = agendarConsulta email
+  | x == "2" = agendarBanhoTosa email
+  | otherwise = invalidOption (agendaAnimal email)
 
-agendarConsulta:: IO()
-agendarConsulta = do
+agendarConsulta:: String -> IO()
+agendarConsulta email = do
   fileExists <- doesFileExist "animais.txt"
   if not fileExists 
     then do
@@ -323,10 +324,9 @@ agendarConsulta = do
       file <- openFile "animais.txt" ReadMode
       animaisContent <- hGetContents file
       let animais = lines animaisContent
-      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome
+      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
 
-      if not hasAnimal
-        then do
+      if not hasAnimal then do
           putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
         else do
           let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Consulta Veterinaria", concluido = False}
@@ -336,8 +336,8 @@ agendarConsulta = do
     
   showMenu
 
-agendarBanhoTosa:: IO()
-agendarBanhoTosa = do
+agendarBanhoTosa:: String -> IO()
+agendarBanhoTosa email = do
   fileExists <- doesFileExist "animais.txt"
   if not fileExists 
     then do
@@ -351,7 +351,7 @@ agendarBanhoTosa = do
       file <- openFile "animais.txt" ReadMode
       animaisContent <- hGetContents file
       let animais = lines animaisContent
-      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome
+      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
 
       if not hasAnimal
         then do
