@@ -269,15 +269,18 @@ toObjListCliente = map toCliente
 
 cadastraAnimal :: String -> IO ()
 cadastraAnimal email = do
-  putStrLn "\nInsira o nome do animal: "
+  putStr "\nInsira o nome do animal: "
   nome <- getLine
-  putStrLn "\nInsira a especie do animal: "
+
+  verificaSeJaExisteUmAnimalCadastrado nome email
+
+  putStr "\nInsira a especie do animal: "
   especie <- getLine
-  putStrLn "\nInsira a altura do animal: "
+  putStr "\nInsira a altura do animal: "
   altura <- getLine
-  putStrLn "\nInsira o peso do animal: "
+  putStr "\nInsira o peso do animal: "
   peso <- getLine
-  putStrLn "\nInsira o idade do animal: "
+  putStr "\nInsira o idade do animal: "
   idade <- getLine
   putStrLn ""
 
@@ -287,6 +290,24 @@ cadastraAnimal email = do
 
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
   showMenu
+
+verificaSeJaExisteUmAnimalCadastrado:: String -> String -> IO()
+verificaSeJaExisteUmAnimalCadastrado nome email = do
+  animaisFile <- openFile "animais.txt" ReadMode 
+  animaisContent <- hGetContents animaisFile
+  let animais = lines animaisContent
+  let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
+
+  if hasAnimal then do
+    putStrLn ("Você já possui um animal cadastrado com o nome '" ++ nome ++ "'.")
+    putStr "Deseja inserir os dados de cadastro de animal novamente? (s/n): "
+    resposta <- getLine
+
+    if resposta == "s" then do
+      hClose animaisFile
+      cadastraAnimal email
+    else showMenu
+  else putStr ""
 
 imprimeClientesCadastrados :: [Cliente] -> Int -> IO ()
 imprimeClientesCadastrados [] 0 = putStrLn "Nenhum cliente cadastrado"
