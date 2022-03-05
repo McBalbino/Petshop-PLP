@@ -1,2 +1,4 @@
 Cliente {nomeCliente = "Charles", email = "teste", senha = "123", telefone = "9049309430", animais = []}
 Cliente {nomeCliente = "charles", email = "r\DELteste", senha = "3892u8392", telefone = "02380923", animais = []}
+Cliente {nomeCliente = "maria", email = "maria@teste.com", senha = "123", telefone = "456789", animais = []}
+Cliente {nomeCliente = "maria", email = "maria2@teste.com", senha = "123", telefone = "456879", animais = []}

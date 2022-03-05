@@ -245,11 +245,21 @@ salvarAnimal dados = do
 editCliente :: Cliente -> Animal -> Cliente
 editCliente (Cliente n e s t as) a = Cliente {nomeCliente=n,email=e,senha=s,telefone=t, animais=a:as}
 
+imprimeClientesCadastrados :: [Cliente] -> Int -> IO()
+imprimeClientesCadastrados [] 0 = putStrLn "Nenhum cliente cadastrado"
+imprimeClientesCadastrados [] _ = putStrLn "Clientes listados com sucesso" 
+imprimeClientesCadastrados (x : xs) n = do
+    putStrLn ((show n) ++ " - " ++ obterNomes x)
+    imprimeClientesCadastrados xs (n + 1)
+
 verClientesCadastrados :: IO()
 verClientesCadastrados = do
-    file <- openFile "clientesCadastrados.txt" ReadMode
+    file <- openFile "clientes.txt" ReadMode
     contents <- hGetContents file
-    print (show contents)
+    let clientes = lines contents
+    imprimeClientesCadastrados [read x :: Cliente | x <- clientes] 0
+
+
 
 removerCliente:: IO()
 removerCliente = do
@@ -297,6 +307,9 @@ obterEmail Cliente {nomeCliente=c, email=e, senha=s, telefone=t, animais=[]} = e
 
 obterSenha :: Cliente -> String
 obterSenha (Cliente _ _ senha _ _) = senha
+
+obterNomes :: Cliente -> String
+obterNomes (Cliente nomeCliente _ _ _ _) = nomeCliente
 
 
 encontraCliente' :: [Cliente] -> String -> String -> Bool
