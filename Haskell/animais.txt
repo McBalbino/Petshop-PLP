@@ -1,3 +1,2 @@
 Animal {nomeAnimal = "Bon\DELb", emailCliente = "teste", especie = "cachorro", peso = "10", altura = "10", idade = "2"}
 Animal {nomeAnimal = "ghdg", emailCliente = "teste", especie = "dog", peso = "10kg", altura = "19", idade = "4"}
-Animal {nomeAnimal = "kmewlkdwemw", emailCliente = "carlos", especie = "mlwmdlwemw", peso = "mdlwmek", altura = "mlemewl", idade = "lwemdelkw"}

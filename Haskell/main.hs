@@ -324,6 +324,7 @@ removerCliente = do
           removeFile "clientes.txt"
           let novaListaDeClientes = [read x :: Cliente | x <- clientes, obterEmail (read x :: Cliente) /= email]
           atualizaClientes novaListaDeClientes
+          removerAnimaisDeUmCliente email
 
   showMenu
 
@@ -502,8 +503,8 @@ verContatoDoAdministrador = do
 
 removerAnimal :: String -> IO ()
 removerAnimal emailDonoDoAnimal = do
-  clientesCadastrados <- doesFileExist "animais.txt"
-  if not clientesCadastrados
+  animaisCadastrados <- doesFileExist "animais.txt"
+  if not animaisCadastrados
     then do
       putStrLn "Não há animais cadastrados!"
     else do
@@ -521,10 +522,22 @@ removerAnimal emailDonoDoAnimal = do
           removeFile "animais.txt"
           let novaListaDeAnimais = [read x :: Animal | x <- animais, not (encontrarAnimalASerRemovido (read x :: Animal) nomeAnimal emailDonoDoAnimal)]
           atualizaAnimais novaListaDeAnimais
-
   showMenu
 
-encontrarAnimalASerRemovido:: Animal -> String -> String -> Bool 
+removerAnimaisDeUmCliente :: String -> IO ()
+removerAnimaisDeUmCliente emailDoCliente = do
+  animaisCadastrados <- doesFileExist "animais.txt"
+  if not animaisCadastrados then do
+      putStrLn "Cliente não possuia animais cadastrados!"
+    else do
+      animaisContent <- readFile "animais.txt"
+      let animais = lines animaisContent
+
+      removeFile "animais.txt"
+      let novaListaDeAnimais = [read x :: Animal | x <- animais, obterEmailDoDonoDoAnimal (read x :: Animal) /= emailDoCliente]
+      atualizaAnimais novaListaDeAnimais
+
+encontrarAnimalASerRemovido :: Animal -> String -> String -> Bool
 encontrarAnimalASerRemovido animal nomeDoAnimal emailDoDono = do
   obterNomeDoAnimal animal == nomeDoAnimal && obterEmailDoDonoDoAnimal animal == emailDoDono
 
