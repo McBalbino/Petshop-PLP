@@ -361,6 +361,15 @@ encontraCliente (c : cs) email senha
   where
     encontrar = encontraCliente cs email senha
 
+encontraAnimal :: [Animal] -> String -> Bool
+encontraAnimal [] nome = False
+-- Procura Animal somente verificando o nome
+encontraAnima (c : cs) nome 
+  | obterAnimal c "nome" == nome = True
+  | obterAnimal c "nome" /= nome = encontrar
+  where
+    encontrar = encontraAnimal cs nome 
+
 cadastrarComoCliente :: IO ()
 cadastrarComoCliente = do
   putStrLn "\nInsira seu nome:"
