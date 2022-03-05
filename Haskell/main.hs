@@ -46,7 +46,7 @@ data Cliente = Cliente
 
 data Agendamento = Agendamento
   { date :: String,
-    servicos :: [String],
+    servicos :: String,
     concluido :: Bool,
     animal :: String
   }
@@ -210,6 +210,7 @@ segundoMenuCliente email = do
   putStrLn "2 - Listar animais cadastrados"
   putStrLn "3 - Acessar Hotelzinho Pet"
   putStrLn "4 - Remover um animal"
+  putStrLn "5 - Agendar serviço para animal"
   putStrLn "x - Retornar para o menu\n"
 
   opcao <- getLine
@@ -221,6 +222,7 @@ segundaTelaCliente x email
   | x == "2" = listarAnimais email
   | x == "3" = menuHotelzinhoPet
   | x == "4" = removerAnimal email
+  | x == "5" = agendaAnimal
   | otherwise = invalidOption menuCliente
 
 indexCliente :: [Cliente] -> String -> Int -> Int
@@ -286,6 +288,77 @@ cadastraAnimal email = do
   appendFile "animais.txt" (show animal ++ "\n")
 
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
+  showMenu
+  
+ agendaAnimal :: IO()
+ agendaAnimal = do
+  putStrLn "\nQual será o serviço?"
+  putStrLn "1 - Agendar consulta veterinária"
+  putStrLn "2 - Agendar banho e tosa"
+
+  opcao <- getLine
+  opcaoServico opcao
+
+opcaoServico:: String -> IO()
+opcaoServico x
+  | x == "1" = agendarConsulta
+  | x == "2" = agendarBanhoTosa
+  | otherwise = invalidOption agendaAnimal
+
+agendarConsulta:: IO()
+agendarConsulta = do
+  fileExists <- doesFileExist "animais.txt"
+  if not fileExists 
+    then do
+      putStrLn "Não há animais cadastrados!"
+    else do
+      putStrLn "\nData do Atendimento:"
+      dataAtendimento <- getLine
+      putStrLn "\nNome do Animal:"
+      nome <- getLine
+        
+      file <- openFile "animais.txt" ReadMode
+      animaisContent <- hGetContents file
+      let animais = lines animaisContent
+      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome
+
+      if not hasAnimal
+        then do
+          putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
+        else do
+          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Consulta Veterinaria", concluido = False}
+          appendFile "agendamentos.txt" (show agendamentos ++ "\n")
+          putStrLn "\nAgendamento Cadastrado com sucessos!\n"
+    
+    
+  showMenu
+
+agendarBanhoTosa:: IO()
+agendarBanhoTosa = do
+  fileExists <- doesFileExist "animais.txt"
+  if not fileExists 
+    then do
+      putStrLn "Não há animais cadastrados!"
+    else do
+      putStrLn "\nData do Atendimento:"
+      dataAtendimento <- getLine
+      putStrLn "\nNome do Animal:"
+      nome <- getLine
+        
+      file <- openFile "animais.txt" ReadMode
+      animaisContent <- hGetContents file
+      let animais = lines animaisContent
+      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome
+
+      if not hasAnimal
+        then do
+          putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
+        else do
+          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Banho e Tosa", concluido = False}
+          appendFile "agendamentos.txt" (show agendamentos ++ "\n")
+          putStrLn "\nAgendamento Cadastrado com sucessos!\n"
+    
+    
   showMenu
 
 imprimeClientesCadastrados :: [Cliente] -> Int -> IO ()
