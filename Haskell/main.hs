@@ -542,7 +542,7 @@ encontrarAnimalASerRemovido animal nomeDoAnimal emailDoDono = do
   obterNomeDoAnimal animal == nomeDoAnimal && obterEmailDoDonoDoAnimal animal == emailDoDono
 
 atualizaAnimais :: [Animal] -> IO ()
-atualizaAnimais [] = putStrLn "Animal removido com sucesso!\n"
+atualizaAnimais [] = putStrLn "Lista de animais atualizada com sucesso!\n"
 atualizaAnimais (x : xs) = do
   animaisCadastrados <- doesFileExist "animais.txt"
   if not animaisCadastrados
