@@ -53,7 +53,8 @@ data Cliente = Cliente
   deriving (Read, Show)
 
 data Agendamento = Agendamento
-  { date :: String,
+  { agendamentoId :: Int,
+    date :: String,
     servicos :: String,
     concluido :: Bool,
     animal :: String,
@@ -111,7 +112,7 @@ menus x
   | otherwise = invalidOption showMenu
 
 encerrarSessao :: IO ()
-encerrarSessao = do 
+encerrarSessao = do
   printLine
   putStrLn "Saindo... Até a próxima!"
   printLine
@@ -143,7 +144,7 @@ acessoAdm = do
       acessoAdm
     else
       showMenu
- 
+
 obterAdmin :: Admin -> String -> String
 obterAdmin Admin {nomeAdmin = n, senhaAdmin = s, telefoneAdmin = t} prop
   | prop == "nome" = n
@@ -234,7 +235,7 @@ mudaContato = do
   putStr "\nInsira o novo número de contato: "
   novoNumero <- getLine
 
-  removeFile "admin.txt" 
+  removeFile "admin.txt"
   adminFile <- openFile "admin.txt" WriteMode
 
   let admin = Admin {
@@ -358,26 +359,32 @@ cadastraAnimal email = do
 
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
   showMenu
-  
+
 agendaAnimal :: String -> IO()
 agendaAnimal email = do
   putStrLn "\nQual será o serviço?"
   putStrLn "1 - Agendar consulta veterinária"
-  putStrLn "2 - Agendar banho e tosa"
+  putStrLn "2 - Agendar banho"
+  putStrLn "3 - Agendar tosa"
+  putStrLn "4 - Agendar banho e tosa"
+  putStrLn "5 - Agendar consulta, banho e tosa (COMBO)"
 
   opcao <- getLine
   opcaoServico opcao email
 
 opcaoServico:: String -> String -> IO()
 opcaoServico x email
-  | x == "1" = agendarConsulta email
-  | x == "2" = agendarBanhoTosa email
+  | x == "1" = agendarAgendamento email "Consulta"
+  | x == "2" = agendarAgendamento email "Banho"
+  | x == "4" = agendarAgendamento email "Tosa"
+  | x == "4" = agendarAgendamento email "Banho, Tosa"
+  | x == "5" = agendarAgendamento email "Consulta, Banho, Tosa"
   | otherwise = invalidOption (agendaAnimal email)
 
-agendarConsulta:: String -> IO()
-agendarConsulta email = do
+agendarAgendamento:: String -> String -> IO()
+agendarAgendamento email servico = do
   fileExists <- doesFileExist "animais.txt"
-  if not fileExists 
+  if not fileExists
     then do
       putStrLn "Não há animais cadastrados!"
     else do
@@ -385,34 +392,7 @@ agendarConsulta email = do
       dataAtendimento <- getLine
       putStrLn "\nNome do Animal:"
       nome <- getLine
-        
-      file <- openFile "animais.txt" ReadMode
-      animaisContent <- hGetContents file
-      let animais = lines animaisContent
-      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
 
-      if not hasAnimal then do
-          putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
-        else do
-          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Consulta Veterinaria", concluido = False, emailDoDono = email}
-          appendFile "agendamentos.txt" (show agendamentos ++ "\n")
-          putStrLn "\nAgendamento Cadastrado com sucessos!\n"
-    
-    
-  showMenu
-
-agendarBanhoTosa:: String -> IO()
-agendarBanhoTosa email = do
-  fileExists <- doesFileExist "animais.txt"
-  if not fileExists 
-    then do
-      putStrLn "Não há animais cadastrados!"
-    else do
-      putStrLn "\nData do Atendimento:"
-      dataAtendimento <- getLine
-      putStrLn "\nNome do Animal:"
-      nome <- getLine
-        
       file <- openFile "animais.txt" ReadMode
       animaisContent <- hGetContents file
       let animais = lines animaisContent
@@ -422,16 +402,37 @@ agendarBanhoTosa email = do
         then do
           putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
         else do
-          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Banho e Tosa", concluido = False, emailDoDono = email}
-          appendFile "agendamentos.txt" (show agendamentos ++ "\n")
+          file <- openFile "agendamentos.txt" ReadMode
+          agendamentosContent <- hGetContents file
+          let agendamentos = lines agendamentosContent
+          let agendamentoId = makeAgendamentoId [read x :: Agendamento | x <- agendamentos]
+
+          let agendamento = Agendamento {agendamentoId = agendamentoId, animal = nome, date = dataAtendimento, servicos = servico, concluido = False, emailDoDono = email}
+          
+          let antigaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos];
+          let novaListaDeAgendamentos = antigaListaDeAgendamentos ++ [agendamento]
+          
+          removeFile "agendamentos.txt"
+          atualizarAgendamentos novaListaDeAgendamentos
           putStrLn "\nAgendamento Cadastrado com sucessos!\n"
-    
-    
   showMenu
+
+atualizarAgendamentos :: [Agendamento] -> IO ()
+atualizarAgendamentos [] = putStrLn "Agendamentos atualizados com sucesso!\n"
+atualizarAgendamentos (x : xs) = do
+  clientesCadastrados <- doesFileExist "agendamentos.txt"
+  if not clientesCadastrados
+    then do
+      file <- openFile "agendamentos.txt" WriteMode
+      hPutStr file (show x)
+      hFlush file
+      hClose file
+    else appendFile "agendamentos.txt" ("\n" ++ show x)
+  atualizarAgendamentos xs
 
 verificaSeJaExisteUmAnimalCadastrado:: String -> String -> IO()
 verificaSeJaExisteUmAnimalCadastrado nome email = do
-  animaisFile <- openFile "animais.txt" ReadMode 
+  animaisFile <- openFile "animais.txt" ReadMode
   animaisContent <- hGetContents animaisFile
   let animais = lines animaisContent
   let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
@@ -661,7 +662,7 @@ agendaHotelzinho = do
 
 verContatoDoAdministrador :: IO ()
 verContatoDoAdministrador = do
-  adminContent <- readFile "admin.txt" 
+  adminContent <- readFile "admin.txt"
   let admin = read adminContent :: Admin
   putStrLn (obterAdmin admin "telefone")
 
@@ -700,7 +701,7 @@ removerAnimaisDeUmCliente emailDoCliente = do
       let animais = lines animaisContent
 
       removeFile "animais.txt"
-      let novaListaDeAnimais = [read x :: Animal | x <- animais, obterEmailDoDonoDoAnimal (read x :: Animal) /= emailDoCliente]
+      let novaListaDeAnimais = [read x :: Animal | x <- animais, obterAnimal (read x :: Animal) "emailCliente" /= emailDoCliente]
       atualizaAnimais novaListaDeAnimais
 
 editarAnimal:: IO ()
@@ -729,8 +730,8 @@ editarAnimal = do
 
 
   let animalEditado = Animal {
-      nomeAnimal = obterNomeDoAnimal dadosAntigosDoAnimal,
-      emailCliente = obterEmailDoDonoDoAnimal dadosAntigosDoAnimal, 
+      nomeAnimal = obterAnimal dadosAntigosDoAnimal "nomeAnimal",
+      emailCliente = obterAnimal dadosAntigosDoAnimal "emailCliente",
       peso = novoPeso,
       altura = novaAltura,
       especie = obterAnimal dadosAntigosDoAnimal "especie",
@@ -738,10 +739,10 @@ editarAnimal = do
     }
   atualizaAnimais novaListaDeAnimais
   appendFile "animais.txt" ("\n" ++ show animalEditado)
-  
+
   showMenu
 
-verificaSeAnimalEClienteExistem:: String -> String -> IO () 
+verificaSeAnimalEClienteExistem:: String -> String -> IO ()
 verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
   clientesContent <- readFile "clientes.txt"
   let clientes = lines clientesContent
@@ -764,7 +765,7 @@ verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
 
 encontrarAnimalASerRemovido :: Animal -> String -> String -> Bool
 encontrarAnimalASerRemovido animal nomeDoAnimal emailDoDono = do
-  obterNomeDoAnimal animal == nomeDoAnimal && obterEmailDoDonoDoAnimal animal == emailDoDono
+  obterAnimal animal "nomeAnimal" == nomeDoAnimal && obterAnimal animal "emailCliente" == emailDoDono
 
 atualizaAnimais :: [Animal] -> IO ()
 atualizaAnimais [] = putStrLn "Lista de animais atualizada com sucesso!\n"
@@ -779,9 +780,28 @@ atualizaAnimais (x : xs) = do
     else appendFile "animais.txt" ("\n" ++ show x)
   atualizaAnimais xs
 
-obterNomeDoAnimal :: Animal -> String
-obterNomeDoAnimal animal = obterAnimal animal "nomeAnimal"
+-- makeAgendamentoId:: IO Int
+-- makeAgendamentoId = do
+  -- file <- openFile "agendamentos.txt" ReadMode
+  -- agendamentosContent <- hGetContents file
+  -- let agendamentos = lines agendamentosContent
 
-obterEmailDoDonoDoAnimal :: Animal -> String
-obterEmailDoDonoDoAnimal animal = obterAnimal animal "emailCliente"
+--   let ultimoAgendamentoId = getUltimoAgendamentoId [read x :: Agendamento | x <- agendamentos]
 
+--   hClose file
+--   return (ultimoAgendamentoId + 1)
+
+makeAgendamentoId:: [Agendamento] -> Int
+makeAgendamentoId [] = 0
+makeAgendamentoId [agendamento] = obterAgendamentoId agendamento + 1
+makeAgendamentoId (agendamento:resto) = do
+  makeAgendamentoId resto
+
+obterAgendamentoId :: Agendamento -> Int
+obterAgendamentoId (Agendamento id _ _ _ _ _) = id
+
+obterAgendamento :: Agendamento -> String -> String
+obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, concluido = c, animal = a} prop
+  | prop == "date" = d
+  | prop == "servicos" = s
+  | prop == "animal" = a
