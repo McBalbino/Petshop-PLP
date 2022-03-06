@@ -76,7 +76,7 @@ showMenu = do
 
   putStrLn "1 - Sou Administrador"
   putStrLn "2 - Sou Cliente"
-  putStrLn "x - Sair"
+  putStrLn "3 - Sair"
   printLine
 
   putStr "Opção: "
@@ -87,7 +87,7 @@ menus :: String -> IO ()
 menus x
   | x == "1" = acessoAdm
   | x == "2" = menuCliente
-  | x == "x" = encerrarSessao
+  | x == "3" = encerrarSessao
   | otherwise = invalidOption showMenu
 
 encerrarSessao :: IO ()
@@ -135,7 +135,7 @@ opcaoAdm x
   | x == "6" = editarAnimal
   | x == "7" = remarcarDataDoAgendamento
   | x == "8" = marcarServicoComoConcluido
-  | x == "x" = showMenu
+  | x == "0" = showMenu
   | otherwise = invalidOption menuAdm
 
 obterCliente :: Cliente -> String -> String
@@ -175,7 +175,7 @@ menuAdm = do
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
   putStrLn "8 - Marcar um servico como concluido"
-  putStrLn "x - Voltar"
+  putStrLn "0 - Voltar"
   opcao <- getLine
   opcaoAdm opcao
 
@@ -255,7 +255,7 @@ menuCliente = do
   putStrLn "1 - Se cadastrar como cliente"
   putStrLn "2 - Logar no sistema como cliente"
   putStrLn "3 - Ver contato do administrador"
-  putStrLn "x - Voltar ao menu principal"
+  putStrLn "0 - Voltar ao menu principal"
   opcao <- getLine
   opcaoCliente opcao
 
@@ -264,7 +264,7 @@ opcaoCliente x
   | x == "1" = cadastrarComoCliente
   | x == "2" = logarComoCliente
   | x == "3" = verContatoDoAdministrador
-  | x == "x" = showMenu
+  | x == "0" = showMenu
   | otherwise = invalidOption menuCliente
 
 segundoMenuCliente :: String -> IO ()
@@ -275,7 +275,7 @@ segundoMenuCliente email = do
   putStrLn "3 - Acessar Hotelzinho Pet"
   putStrLn "4 - Remover um animal"
   putStrLn "5 - Agendar serviço para animal"
-  putStrLn "x - Retornar para o menu\n"
+  putStrLn "0 - Retornar para o menu\n"
 
   opcao <- getLine
   segundaTelaCliente opcao email
@@ -287,7 +287,7 @@ segundaTelaCliente x email
   | x == "3" = menuHotelzinhoPet email
   | x == "4" = removerAnimal email
   | x == "5" = agendaAnimal email
-  | x == "x" = segundoMenuCliente email
+  | x == "0" = segundoMenuCliente email
   | otherwise = invalidOption menuCliente
 
 indexCliente :: [Cliente] -> String -> Int -> Int
