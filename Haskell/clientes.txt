@@ -2,3 +2,4 @@ Cliente {nomeCliente = "Charles", email = "bezar\DELt", senha = "wekmle", telefo
 Cliente {nomeCliente = "amauri", email = "carlos", senha = "123", telefone = "11111111"}
 Cliente {nomeCliente = "amauri", email = "amauri@mail.com", senha = "teste123", telefone = "11111111"}
 Cliente {nomeCliente = "maria", email = "maria@teste.com", senha = "123", telefone = "78945464"}
+Cliente {nomeCliente = "teste", email = "teste", senha = "teste", telefone = "teste"}
