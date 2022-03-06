@@ -134,6 +134,7 @@ opcaoAdm x
   | x == "5" = atualizarContatoAdm
   | x == "6" = editarAnimal
   | x == "7" = remarcarDataDoAgendamento
+  | x == "8" = marcarServicoComoConcluido
   | x == "x" = showMenu
   | otherwise = invalidOption menuAdm
 
@@ -173,6 +174,7 @@ menuAdm = do
   putStrLn "5 - Atualizar contato Adm"
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
+  putStrLn "8 - Marcar um servico como concluido"
   putStrLn "x - Voltar"
   opcao <- getLine
   opcaoAdm opcao
@@ -839,6 +841,47 @@ remarcarDataDoAgendamento = do
                         date = novaData,
                         servicos = obterAgendamento agendamentoDados "servicos",
                         concluido = False,
+                        emailDoDono = obterAgendamento agendamentoDados "email"
+                      }
+
+              removeFile "agendamentos.txt"
+              atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
+              putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
+  menuAdm
+
+marcarServicoComoConcluido :: IO ()
+marcarServicoComoConcluido = do
+  putStr "Digite o id do agendamento que será marcado como concluido: "
+  id <- getLine
+
+  if not (all isDigit id)
+    then do
+      putStrLn "Formato inválido! Digite um número!"
+      marcarServicoComoConcluido
+    else do
+      agendamentosContent <- readFile "agendamentos.txt"
+      let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
+      let hasAgendamento = encontrarAgendamento agendamentos (read id :: Int)
+
+      if not hasAgendamento
+        then do
+          putStrLn ("Agendamento com id '" ++ id ++ "' não existe!")
+          marcarServicoComoConcluido
+        else do
+          let agendamentoDados = encontraERetornaAgendamento agendamentos (read id :: Int)
+
+          if obterAgendamentoStatusDeConcluido agendamentoDados
+            then do
+              putStrLn "Esse atendimento já foi marcado como concluido!"
+              marcarServicoComoConcluido
+            else do
+              let novoAgendamento =
+                    Agendamento
+                      { agendamentoId = obterAgendamentoId agendamentoDados,
+                        animal = obterAgendamento agendamentoDados "animal",
+                        date = obterAgendamento agendamentoDados "date",
+                        servicos = obterAgendamento agendamentoDados "servicos",
+                        concluido = True,
                         emailDoDono = obterAgendamento agendamentoDados "email"
                       }
 
