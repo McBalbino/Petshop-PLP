@@ -371,7 +371,7 @@ remarcarDataDoAgendamento = do
                         date = novaData,
                         servicos = obterAgendamento agendamentoDados "servicos",
                         concluido = False,
-                        emailDoDono = obterAgendamento agendamentoDados "email"
+                        emailDoDono = obterAgendamento agendamentoDados "emailDoDono"
                       }
 
               removeFile "agendamentos.txt"
@@ -412,7 +412,7 @@ marcarServicoComoConcluido = do
                         date = obterAgendamento agendamentoDados "date",
                         servicos = obterAgendamento agendamentoDados "servicos",
                         concluido = True,
-                        emailDoDono = obterAgendamento agendamentoDados "email"
+                        emailDoDono = obterAgendamento agendamentoDados "emailDoDono"
                       }
 
               removeFile "agendamentos.txt"
@@ -1053,5 +1053,5 @@ obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, conclui
 
 verificaAgendamentoASerRemovido:: Agendamento -> String -> String -> Bool
 verificaAgendamentoASerRemovido agendamento emailDoDono nomeDoAnimal = do
-  obterAgendamento agendamento "animal" == nomeDoAnimal && obterAgendamento agendamento "email" == emailDoDono && obterAgendamentoStatusDeConcluido agendamento
+  obterAgendamento agendamento "animal" == nomeDoAnimal && obterAgendamento agendamento "emailDoDono" == emailDoDono && obterAgendamentoStatusDeConcluido agendamento
 
