@@ -91,6 +91,146 @@ menus x
   | x == "3" = encerrarSessao
   | otherwise = invalidOption showMenu
 
+menuAdm :: IO ()
+menuAdm = do
+  printLine
+  putStrLn "\nSelecione uma das opções abaixo:"
+  putStrLn "1 - Ver usuários cadastrados no sistema"
+  putStrLn "2 - Remover usuários"
+  putStrLn "3 - Alterar disponibilidade hotelzinho"
+  putStrLn "4 - listar resumo de atendimentos"
+  putStrLn "5 - Atualizar contato Adm"
+  putStrLn "6 - Editar dados de um animal"
+  putStrLn "7 - Remarcar data de um agendamento"
+  putStrLn "8 - Ver serviços agendados pendentes"
+  putStrLn "9 - Marcar um servico como concluido"
+  putStrLn "0 - Voltar"
+  putStr "Opção: "
+  opcao <- getLine
+  opcaoAdm opcao
+
+opcaoAdm :: String -> IO ()
+opcaoAdm x
+  | x == "1" = verClientesCadastrados
+  | x == "2" = removerCliente
+  | x == "3" = alterarDisponibilidadeHotelzinho
+  | x == "4" = listarResumoDeAtendimentos
+  | x == "5" = atualizarContatoAdm
+  | x == "6" = editarAnimal
+  | x == "7" = remarcarDataDoAgendamento
+  | x == "8" = listarAgendamentosPendentes
+  | x == "9" = marcarServicoComoConcluido
+  | x == "0" = showMenu
+  | otherwise = invalidOption menuAdm
+
+menuCliente :: IO ()
+menuCliente = do
+  putStrLn "\nSelecione uma das opções abaixo:"
+  putStrLn "1 - Se cadastrar como cliente"
+  putStrLn "2 - Logar no sistema como cliente"
+  putStrLn "3 - Ver contato do administrador"
+  putStrLn "0 - Voltar ao menu principal"
+  putStr "Opção: "
+  opcao <- getLine
+  opcaoCliente opcao
+
+opcaoCliente :: String -> IO ()
+opcaoCliente x
+  | x == "1" = cadastrarComoCliente
+  | x == "2" = logarComoCliente
+  | x == "3" = verContatoDoAdministrador
+  | x == "0" = showMenu
+  | otherwise = invalidOption menuCliente
+
+segundoMenuCliente :: String -> IO ()
+segundoMenuCliente email = do
+  putStrLn "\nSelecione o que deseja como cliente"
+  putStrLn "1 - Cadastrar um novo animal"
+  putStrLn "2 - Listar animais cadastrados"
+  putStrLn "3 - Acessar Hotelzinho Pet"
+  putStrLn "4 - Remover um animal"
+  putStrLn "5 - Agendar serviço para animal"
+  putStrLn "0 - Retornar para o menu\n"
+
+  putStr "Opção: "
+  opcao <- getLine
+  segundaTelaCliente opcao email
+
+segundaTelaCliente :: String -> String -> IO ()
+segundaTelaCliente x email
+  | x == "1" = cadastraAnimal email
+  | x == "2" = listarAnimais email
+  | x == "3" = menuHotelzinhoPet email
+  | x == "4" = removerAnimal email
+  | x == "5" = agendaAnimal email
+  | x == "0" = segundoMenuCliente email
+  | otherwise = invalidOption menuCliente
+
+alterarDisponibilidadeHotelzinho :: IO ()
+alterarDisponibilidadeHotelzinho = do
+  putStrLn "\nSelecione qual a disponibilidade do hotelzinho neste momento:"
+  putStrLn "1 - Hotelzinho está disponível"
+  putStrLn "2 - Hotelzinho NÃO está disponível"
+
+  opcao <- getLine
+  opcaoHotelzinho opcao
+
+opcaoHotelzinho :: String -> IO ()
+opcaoHotelzinho x
+  | x == "1" = ativaDesativaHotelzinho True
+  | x == "2" = ativaDesativaHotelzinho False
+  | otherwise = invalidOption alterarDisponibilidadeHotelzinho
+
+atualizarContatoAdm :: IO ()
+atualizarContatoAdm = do
+  putStrLn "\nTem certeza que deseja atualizar o contato do Administrador?"
+  putStrLn "\n--Aperte 1 para continuar--"
+  opcao <- getLine
+  opcaoContato opcao
+
+opcaoContato :: String -> IO ()
+opcaoContato x
+  | x == "1" = mudaContato
+  | otherwise = invalidOption menuAdm
+
+agendaAnimal :: String -> IO ()
+agendaAnimal email = do
+  putStrLn "\nQual será o serviço?"
+  putStrLn "1 - Agendar consulta veterinária"
+  putStrLn "2 - Agendar banho"
+  putStrLn "3 - Agendar tosa"
+  putStrLn "4 - Agendar banho e tosa"
+  putStrLn "5 - Agendar consulta, banho e tosa (COMBO)"
+  putStr "Opção: "
+  opcao <- getLine
+  opcaoServico opcao email
+
+opcaoServico :: String -> String -> IO ()
+opcaoServico x email
+  | x == "1" = agendarAgendamento email "Consulta"
+  | x == "2" = agendarAgendamento email "Banho"
+  | x == "4" = agendarAgendamento email "Tosa"
+  | x == "4" = agendarAgendamento email "Banho, Tosa"
+  | x == "5" = agendarAgendamento email "Consulta, Banho, Tosa"
+  | otherwise = invalidOption (agendaAnimal email)
+
+menuHotelzinhoPet :: String -> IO ()
+menuHotelzinhoPet email = do
+  putStrLn "O Hotelzinho Pet é o serviço de hospedagem de animaizinhos!"
+  putStrLn "Você deseja hospedar algum animalzinho no nosso serviço?"
+  putStrLn "1 - Agendar animal"
+  putStrLn "Caso não tenha interesse, prima qualquer outra tecla"
+  putStr "Opção: "
+  opcao <- getLine
+  lerOpcaoHotelzinho opcao email
+
+lerOpcaoHotelzinho :: String -> String -> IO ()
+lerOpcaoHotelzinho x email
+  | x == "1" = agendaHotelzinho email
+  | otherwise = do
+    putStrLn "Servico de hotelzinho cancelado"
+    segundoMenuCliente email
+
 encerrarSessao :: IO ()
 encerrarSessao = do
   printLine
@@ -151,57 +291,11 @@ obterAdmin Admin {nomeAdmin = n, senhaAdmin = s, telefoneAdmin = t} prop
   | prop == "senha" = s
   | prop == "telefone" = t
 
-menuAdm :: IO ()
-menuAdm = do
-  printLine
-  putStrLn "\nSelecione uma das opções abaixo:"
-  putStrLn "1 - Ver usuários cadastrados no sistema"
-  putStrLn "2 - Remover usuários"
-  putStrLn "3 - Alterar disponibilidade hotelzinho"
-  putStrLn "4 - listar resumo de atendimentos"
-  putStrLn "5 - Atualizar contato Adm"
-  putStrLn "6 - Editar dados de um animal"
-  putStrLn "7 - Remarcar data de um agendamento"
-  putStrLn "8 - Ver serviços agendados pendentes"
-  putStrLn "9 - Marcar um servico como concluido"
-  putStrLn "0 - Voltar"
-  opcao <- getLine
-  opcaoAdm opcao
-
-opcaoAdm :: String -> IO ()
-opcaoAdm x
-  | x == "1" = verClientesCadastrados
-  | x == "2" = removerCliente
-  | x == "3" = alterarDisponibilidadeHotelzinho
-  | x == "4" = listarResumoDeAtendimentos
-  | x == "5" = atualizarContatoAdm
-  | x == "6" = editarAnimal
-  | x == "7" = remarcarDataDoAgendamento
-  | x == "8" = listarAgendamentosPendentes
-  | x == "9" = marcarServicoComoConcluido
-  | x == "0" = showMenu
-  | otherwise = invalidOption menuAdm
-
 listarResumoDeAtendimentos :: IO ()
 listarResumoDeAtendimentos = do
   file <- openFile "agendamentos.txt" ReadMode
   contents <- hGetContents file
   print (show contents)
-
-alterarDisponibilidadeHotelzinho :: IO ()
-alterarDisponibilidadeHotelzinho = do
-  putStrLn "\nSelecione qual a disponibilidade do hotelzinho neste momento:"
-  putStrLn "1 - Hotelzinho está disponível"
-  putStrLn "2 - Hotelzinho NÃO está disponível"
-
-  opcao <- getLine
-  opcaoHotelzinho opcao
-
-opcaoHotelzinho :: String -> IO ()
-opcaoHotelzinho x
-  | x == "1" = ativaDesativaHotelzinho True
-  | x == "2" = ativaDesativaHotelzinho False
-  | otherwise = invalidOption alterarDisponibilidadeHotelzinho
 
 ativaDesativaHotelzinho :: Bool -> IO ()
 ativaDesativaHotelzinho x = do
@@ -215,18 +309,6 @@ ativaDesativaHotelzinho x = do
   hPutStr disponibilidadeFile (show disponibilidade)
   hFlush disponibilidadeFile
   hClose disponibilidadeFile
-
-atualizarContatoAdm :: IO ()
-atualizarContatoAdm = do
-  putStrLn "\nTem certeza que deseja atualizar o contato do Administrador?"
-  putStrLn "\n--Aperte 1 para continuar--"
-  opcao <- getLine
-  opcaoContato opcao
-
-opcaoContato :: String -> IO ()
-opcaoContato x
-  | x == "1" = mudaContato
-  | otherwise = invalidOption menuAdm
 
 mudaContato :: IO ()
 mudaContato = do
@@ -252,47 +334,6 @@ mudaContato = do
 
   putStrLn "\nContato atualizado com sucesso!"
   menuAdm
-
-menuCliente :: IO ()
-menuCliente = do
-  putStrLn "\nSelecione uma das opções abaixo:"
-  putStrLn "1 - Se cadastrar como cliente"
-  putStrLn "2 - Logar no sistema como cliente"
-  putStrLn "3 - Ver contato do administrador"
-  putStrLn "0 - Voltar ao menu principal"
-  opcao <- getLine
-  opcaoCliente opcao
-
-opcaoCliente :: String -> IO ()
-opcaoCliente x
-  | x == "1" = cadastrarComoCliente
-  | x == "2" = logarComoCliente
-  | x == "3" = verContatoDoAdministrador
-  | x == "0" = showMenu
-  | otherwise = invalidOption menuCliente
-
-segundoMenuCliente :: String -> IO ()
-segundoMenuCliente email = do
-  putStrLn "\nSelecione o que deseja como cliente"
-  putStrLn "1 - Cadastrar um novo animal"
-  putStrLn "2 - Listar animais cadastrados"
-  putStrLn "3 - Acessar Hotelzinho Pet"
-  putStrLn "4 - Remover um animal"
-  putStrLn "5 - Agendar serviço para animal"
-  putStrLn "0 - Retornar para o menu\n"
-
-  opcao <- getLine
-  segundaTelaCliente opcao email
-
-segundaTelaCliente :: String -> String -> IO ()
-segundaTelaCliente x email
-  | x == "1" = cadastraAnimal email
-  | x == "2" = listarAnimais email
-  | x == "3" = menuHotelzinhoPet email
-  | x == "4" = removerAnimal email
-  | x == "5" = agendaAnimal email
-  | x == "0" = segundoMenuCliente email
-  | otherwise = invalidOption menuCliente
 
 indexCliente :: [Cliente] -> String -> Int -> Int
 indexCliente (c : cs) email i
@@ -390,27 +431,6 @@ mostrarAgendamentosPendentes (a : as) = do
       putStrLn ("Servico: " ++ obterAgendamento a "servicos")
       putStrLn ("Email do Dono: " ++ obterAgendamento a "email" ++ "\n")
       mostrarAgendamentosPendentes as
-
-agendaAnimal :: String -> IO ()
-agendaAnimal email = do
-  putStrLn "\nQual será o serviço?"
-  putStrLn "1 - Agendar consulta veterinária"
-  putStrLn "2 - Agendar banho"
-  putStrLn "3 - Agendar tosa"
-  putStrLn "4 - Agendar banho e tosa"
-  putStrLn "5 - Agendar consulta, banho e tosa (COMBO)"
-
-  opcao <- getLine
-  opcaoServico opcao email
-
-opcaoServico :: String -> String -> IO ()
-opcaoServico x email
-  | x == "1" = agendarAgendamento email "Consulta"
-  | x == "2" = agendarAgendamento email "Banho"
-  | x == "4" = agendarAgendamento email "Tosa"
-  | x == "4" = agendarAgendamento email "Banho, Tosa"
-  | x == "5" = agendarAgendamento email "Consulta, Banho, Tosa"
-  | otherwise = invalidOption (agendaAnimal email)
 
 agendarAgendamento :: String -> String -> IO ()
 agendarAgendamento email servico = do
@@ -639,23 +659,6 @@ logarComoCliente = do
     else do
       putStrLn "Nenhum cliente não cadastrado. Por favor, cadastre-se"
       cadastrarComoCliente
-
-menuHotelzinhoPet :: String -> IO ()
-menuHotelzinhoPet email = do
-  putStrLn "O Hotelzinho Pet é o serviço de hospedagem de animaizinhos!"
-  putStrLn "Você deseja hospedar algum animalzinho no nosso serviço?"
-  putStrLn "1 - Agendar animal"
-  putStrLn "Caso não tenha interesse, prima qualquer outra tecla"
-
-  opcao <- getLine
-  lerOpcaoHotelzinho opcao email
-
-lerOpcaoHotelzinho :: String -> String -> IO ()
-lerOpcaoHotelzinho x email
-  | x == "1" = agendaHotelzinho email
-  | otherwise = do
-    putStrLn "Servico de hotelzinho cancelado"
-    segundoMenuCliente email
 
 obterDisponibilidade :: DisponibilidadeHotelzinho -> Bool
 obterDisponibilidade DisponibilidadeHotelzinho {disponibilidade = d} = d
