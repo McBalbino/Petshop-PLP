@@ -3,4 +3,6 @@ Animal {nomeAnimal = "ghdg", emailCliente = "teste", especie = "dog", peso = "10
 Animal {nomeAnimal = "kmewlkdwemw", emailCliente = "carlos", especie = "mlwmdlwemw", peso = "mdlwmek", altura = "mlemewl", idade = "lwemdelkw"}
 Animal {nomeAnimal = "sadasd", emailCliente = "carlos", especie = "asdasd", peso = "asdsa", altura = "asda", idade = "asd"}
 Animal {nomeAnimal = "asjdahsda", emailCliente = "carlos", especie = "asdjasjkd", peso = "sajdksajk", altura = "asdkjsadjka", idade = "sadsa"}
-Animal {nomeAnimal = "Putin", emailCliente = "carlos", especie = "burro", peso = "10kg", altura = "60cm", idade = "12"}Animal {nomeAnimal = "bob", emailCliente = "teste", especie = "bob", peso = "bob", altura = "bob", idade = "bob"}
+Animal {nomeAnimal = "Putin", emailCliente = "carlos", especie = "burro", peso = "10kg", altura = "60cm", idade = "12"}
+Animal {nomeAnimal = "bob", emailCliente = "teste", especie = "bob", peso = "bob", altura = "bob", idade = "bob"}
+Animal {nomeAnimal = "jorge", emailCliente = "carlos", especie = "jorge", peso = "jorge", altura = "jorge", idade = "jorge"}
