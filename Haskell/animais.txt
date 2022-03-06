@@ -4,5 +4,9 @@ Animal {nomeAnimal = "kmewlkdwemw", emailCliente = "carlos", especie = "mlwmdlwe
 Animal {nomeAnimal = "sadasd", emailCliente = "carlos", especie = "asdasd", peso = "asdsa", altura = "asda", idade = "asd"}
 Animal {nomeAnimal = "asjdahsda", emailCliente = "carlos", especie = "asdjasjkd", peso = "sajdksajk", altura = "asdkjsadjka", idade = "sadsa"}
 Animal {nomeAnimal = "Putin", emailCliente = "carlos", especie = "burro", peso = "10kg", altura = "60cm", idade = "12"}
+<<<<<<< HEAD
 Animal {nomeAnimal = "bob", emailCliente = "teste", especie = "bob", peso = "bob", altura = "bob", idade = "bob"}
 Animal {nomeAnimal = "jorge", emailCliente = "carlos", especie = "jorge", peso = "jorge", altura = "jorge", idade = "jorge"}
+=======
+Animal {nomeAnimal = "teste", emailCliente = "teste", especie = "teste", peso = "teste", altura = "teste", idade = "teste"}
+>>>>>>> 0f0829f0d92dc1b8b1734f31d15ee08d669f44ea
