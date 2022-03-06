@@ -292,6 +292,9 @@ removerCliente = do
           let novaListaDeClientes = [read x :: Cliente | x <- clientes, obterEmail (read x :: Cliente) /= email]
           atualizaClientes novaListaDeClientes
           removerAnimaisDeUmCliente email
+          removerAgendamentosDeUmCliente email
+
+          putStrLn "Cliente removido com sucesso, todos os animais e agendamentos não realizados do cliente também foram removidos!"
 
   menuAdm
 
@@ -585,11 +588,16 @@ cadastraAnimal email = do
 
   let animal = Animal {nomeAnimal = nome, emailCliente = email, peso = peso, altura = altura, especie = especie, idade = idade}
 
-  appendFile "animais.txt" (show animal ++ "\n")
+  animaisCadastrados <- doesFileExist "animais.txt"
 
-  putStrLn "\nAnimal Cadastrado com sucessos!\n"
+  if animaisCadastrados then do
+    appendFile "animais.txt" ("\n" ++ show animal)
+
+    putStrLn "\nAnimal Cadastrado com sucessos!\n"
+  else appendFile "animais.txt" (show animal)
   segundoMenuCliente email
 
+converterEmAgendamento :: String -> Agendamento
 converterEmAgendamento a = read a :: Agendamento
 
 agendarAgendamento :: String -> String -> IO ()
@@ -663,10 +671,17 @@ cadastrarComoCliente = do
 criarCliente :: String -> String -> String -> String -> IO ()
 criarCliente nome email senha telefone = do
   let cliente = Cliente {nomeCliente = nome, email = email, senha = senha, telefone = telefone}
-  file <- appendFile "clientes.txt" (show cliente ++ "\n")
-  putStrLn "\nCliente cadastrado com sucesso!"
-  putStrLn ""
-  menuCliente
+
+  clientesCadastrados <- doesFileExist "clientes.txt"
+
+  if clientesCadastrados then do
+    file <- appendFile "clientes.txt" ("\n" ++ show cliente)
+    putStrLn "\nCliente cadastrado com sucesso!"
+    putStrLn ""
+    menuCliente
+  else do
+    file <- appendFile "clientes.txt" (show cliente)
+    menuCliente
 
 logarComoCliente :: IO ()
 logarComoCliente = do
@@ -779,8 +794,23 @@ removerAgendamentosDeUmAnimal emailDoCliente nomeAnimal = do
       let agendamentos = lines agendamentosContent
 
       removeFile "agendamentos.txt"
-      let novaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos, verificaAgendamentoASerRemovido (read x :: Agendamento) emailDoCliente nomeAnimal]
+      let novaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos, not (verificaAgendamentoASerRemovido (read x :: Agendamento) emailDoCliente nomeAnimal)]
       atualizarAgendamentos novaListaDeAgendamentos
+
+removerAgendamentosDeUmCliente :: String -> IO ()
+removerAgendamentosDeUmCliente emailDoCliente = do
+  agendamentosCadastrados <- doesFileExist "agendamentos.txt"
+  if not agendamentosCadastrados
+    then do
+      putStrLn "Cliente não possuia agendamentos!"
+    else do
+      agendamentosContent <- readFile "agendamentos.txt"
+      let agendamentos = lines agendamentosContent
+
+      removeFile "agendamentos.txt"
+      let novaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos, not (verificaAgendamentoASerRemovidoByCliente (read x :: Agendamento) emailDoCliente)]
+      atualizarAgendamentos novaListaDeAgendamentos
+
 
 ------------------------------------
 
@@ -860,8 +890,8 @@ toObjListCliente = map toCliente
 atualizarAgendamentos :: [Agendamento] -> IO ()
 atualizarAgendamentos [] = putStrLn "Agendamentos atualizados com sucesso!\n"
 atualizarAgendamentos (x : xs) = do
-  clientesCadastrados <- doesFileExist "agendamentos.txt"
-  if not clientesCadastrados
+  agendamentosCadastrados <- doesFileExist "agendamentos.txt"
+  if not agendamentosCadastrados
     then do
       file <- openFile "agendamentos.txt" WriteMode
       hPutStr file (show x)
@@ -1007,5 +1037,9 @@ obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, conclui
 
 verificaAgendamentoASerRemovido:: Agendamento -> String -> String -> Bool
 verificaAgendamentoASerRemovido agendamento emailDoDono nomeDoAnimal = do
-  obterAgendamento agendamento "animal" == nomeDoAnimal && obterAgendamento agendamento "emailDoDono" == emailDoDono && obterAgendamentoStatusDeConcluido agendamento
+  obterAgendamento agendamento "animal" == nomeDoAnimal && obterAgendamento agendamento "emailDoDono" == emailDoDono && not (obterAgendamentoStatusDeConcluido agendamento)
+
+verificaAgendamentoASerRemovidoByCliente:: Agendamento -> String -> Bool
+verificaAgendamentoASerRemovidoByCliente agendamento emailDoDono = do
+  obterAgendamento agendamento "emailDoDono" == emailDoDono && not (obterAgendamentoStatusDeConcluido agendamento)
 

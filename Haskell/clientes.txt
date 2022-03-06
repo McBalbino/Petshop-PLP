@@ -1,3 +1,2 @@
-Cliente {nomeCliente = "Charles", email = "bezar\DELt", senha = "wekmle", telefone = "wklemw"}
-Cliente {nomeCliente = "amauri", email = "carlos", senha = "123", telefone = "11111111"}
-Cliente {nomeCliente = "amauri", email = "amauri@mail.com", senha = "teste123", telefone = "11111111"}Cliente {nomeCliente = "carlos", email = "carlos@mail.com", senha = "123", telefone = "83 993598300"}
+Cliente {nomeCliente = "Cteste", email = "teste", senha = "teste", telefone = "teste"}
+Cliente {nomeCliente = "Cteste", email = "carlos", senha = "123", telefone = "teste"}
