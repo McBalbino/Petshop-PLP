@@ -111,7 +111,8 @@ menuAdm = do
   putStrLn "3 - Alterar disponibilidade hotelzinho"
   putStrLn "4 - listar resumo de atendimentos"
   putStrLn "5 - Atualizar contato Adm"
-  putStrLn "6 - Voltar"
+  putStrLn "6 - EditarDadosDeUmAnimal"
+  putStrLn "7 - Voltar"
   opcao <- getLine
   opcaoAdm opcao
 
@@ -122,7 +123,8 @@ opcaoAdm x
   | x == "3" = alterarDisponibilidadeHotelzinho
   | x == "4" = listarResumoDeAtendimentos
   | x == "5" = atualizarContatoAdm
-  | x == "6" = showMenu
+  | x == "6" = editarAnimal
+  | x == "7" = showMenu
   | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO ()
@@ -467,6 +469,13 @@ encontraAnimal (c : cs) nome emailDonoDoAnimal
   where
     encontrar = encontraAnimal cs nome emailDonoDoAnimal
 
+encontraERetornaAnimal :: [Animal] -> String -> String -> Animal
+encontraERetornaAnimal (c : cs) nome emailDonoDoAnimal
+  | obterAnimal c "nomeAnimal" == nome && obterAnimal c "emailCliente" == emailDonoDoAnimal = c
+  | not (obterAnimal c "nomeAnimal" == nome && obterAnimal c "emailCliente" == emailDonoDoAnimal) = encontrar
+  where
+    encontrar = encontraERetornaAnimal cs nome emailDonoDoAnimal
+
 cadastrarComoCliente :: IO ()
 cadastrarComoCliente = do
   putStrLn "\nInsira seu nome:"
@@ -631,6 +640,65 @@ removerAnimaisDeUmCliente emailDoCliente = do
       let novaListaDeAnimais = [read x :: Animal | x <- animais, obterEmailDoDonoDoAnimal (read x :: Animal) /= emailDoCliente]
       atualizaAnimais novaListaDeAnimais
 
+editarAnimal:: IO ()
+editarAnimal = do
+  putStr "Nome do animal que vai ser editado: "
+  nomeAnimal <- getLine
+  putStr "Email do cliente dono do animal: "
+  emailDoDono <- getLine
+
+  verificaSeAnimalEClienteExistem nomeAnimal emailDoDono
+
+  putStr "Novo peso do animal: "
+  novoPeso <- getLine
+  putStr "Nova altura do animal: "
+  novaAltura <- getLine
+  putStr "Nova idade do animal: "
+  novaIdade <- getLine
+
+  animaisContents <- readFile "animais.txt"
+  let animais = lines animaisContents
+
+  let dadosAntigosDoAnimal = encontraERetornaAnimal [read x :: Animal | x <- animais] nomeAnimal emailDoDono
+
+  removeFile "animais.txt"
+  let novaListaDeAnimais = [read x :: Animal | x <- animais, not (encontrarAnimalASerRemovido (read x :: Animal) nomeAnimal emailDoDono)]
+
+
+  let animalEditado = Animal {
+      nomeAnimal = obterNomeDoAnimal dadosAntigosDoAnimal,
+      emailCliente = obterEmailDoDonoDoAnimal dadosAntigosDoAnimal, 
+      peso = novoPeso,
+      altura = novaAltura,
+      especie = obterAnimal dadosAntigosDoAnimal "especie",
+      idade = novaIdade
+    }
+  atualizaAnimais novaListaDeAnimais
+  appendFile "animais.txt" ("\n" ++ show animalEditado)
+  
+  showMenu
+
+verificaSeAnimalEClienteExistem:: String -> String -> IO () 
+verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
+  clientesContent <- readFile "clientes.txt"
+  let clientes = lines clientesContent
+
+  let hasCliente = encontraCliente [read x :: Cliente | x <- clientes] emailCliente ""
+
+  if not hasCliente then do
+    putStrLn ("O cliente '" ++ emailCliente ++ "' não existe. Verifique se o email foi digitado corretamente!")
+    showMenu
+  else do
+    animaisContent <- readFile "animais.txt"
+    let animais = lines animaisContent
+
+    let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeAnimal emailCliente
+
+    if not hasAnimal then do
+      putStrLn ("O cliente '" ++ emailCliente ++ "' não possui o animal '" ++ nomeAnimal ++ "' cadastrado!")
+      showMenu
+    else putStr ""
+
 encontrarAnimalASerRemovido :: Animal -> String -> String -> Bool
 encontrarAnimalASerRemovido animal nomeDoAnimal emailDoDono = do
   obterNomeDoAnimal animal == nomeDoAnimal && obterEmailDoDonoDoAnimal animal == emailDoDono
@@ -649,7 +717,8 @@ atualizaAnimais (x : xs) = do
   atualizaAnimais xs
 
 obterNomeDoAnimal :: Animal -> String
-obterNomeDoAnimal (Animal nomeAnimal _ _ _ _ _) = nomeAnimal
+obterNomeDoAnimal animal = obterAnimal animal "nomeAnimal"
 
 obterEmailDoDonoDoAnimal :: Animal -> String
-obterEmailDoDonoDoAnimal (Animal _ email _ _ _ _) = email
+obterEmailDoDonoDoAnimal animal = obterAnimal animal "emailCliente"
+

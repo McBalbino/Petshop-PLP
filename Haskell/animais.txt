@@ -1,6 +1,6 @@
 Animal {nomeAnimal = "Bon\DELb", emailCliente = "teste", especie = "cachorro", peso = "10", altura = "10", idade = "2"}
 Animal {nomeAnimal = "ghdg", emailCliente = "teste", especie = "dog", peso = "10kg", altura = "19", idade = "4"}
-Animal {nomeAnimal = "Putin", emailCliente = "carlos", especie = "burro", peso = "10000kg", altura = "0", idade = "110"}
 Animal {nomeAnimal = "kmewlkdwemw", emailCliente = "carlos", especie = "mlwmdlwemw", peso = "mdlwmek", altura = "mlemewl", idade = "lwemdelkw"}
 Animal {nomeAnimal = "sadasd", emailCliente = "carlos", especie = "asdasd", peso = "asdsa", altura = "asda", idade = "asd"}
 Animal {nomeAnimal = "asjdahsda", emailCliente = "carlos", especie = "asdjasjkd", peso = "sajdksajk", altura = "asdkjsadjka", idade = "sadsa"}
+Animal {nomeAnimal = "Putin", emailCliente = "carlos", especie = "burro", peso = "10kg", altura = "60cm", idade = "12"}
