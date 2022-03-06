@@ -134,6 +134,7 @@ opcaoAdm x
   | x == "5" = atualizarContatoAdm
   | x == "6" = editarAnimal
   | x == "7" = remarcarDataDoAgendamento
+  | x == "8" = listarAgendamentosPendentes
   | x == "x" = showMenu
   | otherwise = invalidOption menuAdm
 
@@ -173,6 +174,7 @@ menuAdm = do
   putStrLn "5 - Atualizar contato Adm"
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
+  putStrLn "8 - Ver serviços agendados pendentes"
   putStrLn "x - Voltar"
   opcao <- getLine
   opcaoAdm opcao
@@ -357,6 +359,33 @@ cadastraAnimal email = do
 
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
   segundoMenuCliente email
+  
+converterEmAgendamento a = read a :: Agendamento
+
+listarAgendamentosPendentes :: IO ()
+listarAgendamentosPendentes = do
+  file <- openFile "agendamentos.txt" ReadMode
+  contents <- hGetContents file
+
+  let agendamentosStr = lines contents
+  let agendamentos = map converterEmAgendamento agendamentosStr
+
+  mostrarAgendamentosPendentes agendamentos
+  showMenu  
+
+mostrarAgendamentosPendentes :: [Agendamento] -> IO ()
+mostrarAgendamentosPendentes [] = do
+  putStrLn ""
+mostrarAgendamentosPendentes (a : as) = do
+  if obterAgendamentoStatusDeConcluido a /= True
+    then do
+      mostrarAgendamentosPendentes as
+    else do
+      putStrLn ("Nome: " ++ obterAgendamento a "animal")
+      putStrLn ("Data: " ++ obterAgendamento a "date")
+      putStrLn ("Servico: " ++ obterAgendamento a "servico")
+      putStrLn ("Email do Dono: " ++ obterAgendamento a "email" ++ "\n")
+      mostrarAgendamentosPendentes as
 
 agendaAnimal :: String -> IO ()
 agendaAnimal email = do
