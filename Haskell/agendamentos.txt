@@ -1,5 +1,3 @@
-Agendamento {agendamentoId = 1, date = "06/03/2022", servicos = "Banho e Tosa", concluido = True, animal = "Putin", emailDoDono = "carlos"}
-Agendamento {agendamentoId = 0, date = "06/03/2022", servicos = "Banho e Tosa", concluido = True, animal = "Putin", emailDoDono = "carlos"}
 Agendamento {agendamentoId = 2, date = "06/03/2021", servicos = "Consulta", concluido = False, animal = "Putin", emailDoDono = "carlos"}
 Agendamento {agendamentoId = 3, date = "jskdjkadhsad", servicos = "Consulta", concluido = False, animal = "Putin", emailDoDono = "carlos"}
 Agendamento {agendamentoId = 4, date = "asjkakdakads", servicos = "Consulta, Banho, Tosa", concluido = False, animal = "Putin", emailDoDono = "carlos"}

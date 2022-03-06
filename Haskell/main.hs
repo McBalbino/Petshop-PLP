@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 {-# HLINT ignore "Use newtype instead of data" #-}
+{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 
 import Data.Char (isDigit, toLower)
 import qualified Distribution.Compat.CharParsing as DisponibilidadeHotelzinho
@@ -154,6 +155,7 @@ segundoMenuCliente email = do
   putStrLn "3 - Acessar Hotelzinho Pet"
   putStrLn "4 - Remover um animal"
   putStrLn "5 - Agendar serviço para animal"
+  putStrLn "6 - Cancelar agendamento"
   putStrLn "0 - Retornar para o menu\n"
   printLine
   putStr "Opção: "
@@ -167,6 +169,7 @@ segundaTelaCliente x email
   | x == "3" = menuHotelzinhoPet email
   | x == "4" = removerAnimal email
   | x == "5" = agendaAnimal email
+  | x == "6" = cancelarAgendamento email
   | x == "0" = menuCliente
   | otherwise = invalidOption menuCliente
 
@@ -782,6 +785,48 @@ removerAgendamentosDeUmAnimal emailDoCliente nomeAnimal = do
       let novaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos, verificaAgendamentoASerRemovido (read x :: Agendamento) emailDoCliente nomeAnimal]
       atualizarAgendamentos novaListaDeAgendamentos
 
+cancelarAgendamento :: String -> IO()
+cancelarAgendamento emailCliente = do
+  file <- openFile "agendamentos.txt" ReadMode
+  contents <- hGetContents file
+  putStrLn "Escolhar um agendamento para cancelar: \n"
+  escolherAgendamento [read a :: Agendamento | a <- lines contents, obterAgendamento (read a :: Agendamento) "emailDoDono" == emailCliente] emailCliente
+
+escolherAgendamento :: [Agendamento] -> String -> IO()
+escolherAgendamento [] emailCliente = do
+  putStrLn "Nenhum agendamento cadastrado \n"
+  segundoMenuCliente emailCliente
+
+escolherAgendamento [a] emailCliente = do 
+  imprimirEscolhaAgendamento a
+  putStr "opção: "
+  opcao <- getLine
+  removerAgendamento opcao emailCliente
+
+escolherAgendamento (a:as) emailCliente = do
+  imprimirEscolhaAgendamento a
+  escolherAgendamento as emailCliente
+
+
+imprimirEscolhaAgendamento :: Agendamento -> IO ()
+imprimirEscolhaAgendamento a = do 
+  putStrLn (obterAgendamento a "agendamentoId" ++ " - " ++ "Animal: " ++ obterAgendamento a "animal" ++ "; " ++ "Data: " ++ obterAgendamento a "date")
+
+removerAgendamento :: String -> String -> IO()
+removerAgendamento opcao emailCliente = do
+  contents <- readFile "agendamentos.txt"
+  let agendamentos = [read a :: Agendamento | a <- lines contents]
+  let hasAgendamento = encontrarAgendamento agendamentos (read opcao :: Int)
+  
+  if not hasAgendamento then do
+    putStrLn "Agendamento não encontrado"
+    cancelarAgendamento emailCliente
+  else do
+    removeFile "agendamentos.txt"
+    atualizarAgendamentos [a | a <- agendamentos, obterAgendamento a "agendamentoId" /= opcao]
+    putStrLn "Agendamento cancelado com sucesso!"
+    segundoMenuCliente emailCliente
+
 ------------------------------------
 
 -------- Metodos auxiliares --------
@@ -999,6 +1044,7 @@ encontraERetornaAgendamento (c : cs) agendamentoId
 
 obterAgendamento :: Agendamento -> String -> String
 obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, concluido = c, animal = a, emailDoDono = e} prop
+  | prop == "agendamentoId" = show i
   | prop == "date" = d
   | prop == "animal" = a
   | prop == "concluido" = show c
