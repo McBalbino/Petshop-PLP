@@ -646,9 +646,9 @@ agendaHotelzinho = do
 
 verContatoDoAdministrador :: IO ()
 verContatoDoAdministrador = do
-  file <- openFile "contato.txt" ReadMode
-  contato <- hGetContents file
-  putStrLn contato
+  adminContent <- readFile "admin.txt" 
+  let admin = read adminContent :: Admin
+  putStrLn (obterAdmin admin "telefone")
 
   showMenu
 
