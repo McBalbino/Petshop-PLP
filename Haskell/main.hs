@@ -854,5 +854,4 @@ obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, conclui
   | prop == "date" = d
   | prop == "animal" = a
   | prop == "servicos" = s
-  | prop == "animal" = a
   | prop == "email" = e
