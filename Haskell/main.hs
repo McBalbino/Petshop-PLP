@@ -25,6 +25,13 @@ import System.IO
   )
 import System.IO.Error ()
 import Prelude hiding (catch)
+import qualified Distribution.Compat.CharParsing as DisponibilidadeHotelzinho
+
+
+data DisponibilidadeHotelzinho = DisponibilidadeHotelzinho
+  { disponibilidade :: Bool
+  }
+  deriving (Read, Show)
 
 data Animal = Animal
   { nomeAnimal :: String,
@@ -193,25 +200,21 @@ alterarDisponibilidadeHotelzinho = do
 
 opcaoHotelzinho :: String -> IO ()
 opcaoHotelzinho x
-  | x == "1" = ativaHotelzinho
-  | x == "2" = desativaHotelzinho
+  | x == "1" = ativaDesativaHotelzinho True
+  | x == "2" = ativaDesativaHotelzinho False
   | otherwise = invalidOption alterarDisponibilidadeHotelzinho
 
-ativaHotelzinho :: IO ()
-ativaHotelzinho = do
-  file <- openFile "hotelzinho.txt" WriteMode
-  hPutStr file "disponível"
-  hClose file
-  putStrLn "Hotelzinho foi configurado como disponível"
-  menuAdm
+ativaDesativaHotelzinho :: Bool -> IO ()
+ativaDesativaHotelzinho x = do
+    removeFile "disponibilidadeHotelzinho.txt"
+    disponibilidadeFile <- openFile "disponibilidadeHotelzinho.txt" WriteMode
 
-desativaHotelzinho :: IO ()
-desativaHotelzinho = do
-  file <- openFile "hotelzinho.txt" WriteMode
-  hPutStr file "indisponível"
-  hClose file
-  putStrLn "Hotelzinho foi configurado como indisponível"
-  menuAdm
+    let disponibilidade = DisponibilidadeHotelzinho {
+        disponibilidade = x
+    }
+    hPutStr disponibilidadeFile (show disponibilidade)
+    hFlush disponibilidadeFile
+    hClose disponibilidadeFile
 
 atualizarContatoAdm :: IO ()
 atualizarContatoAdm = do
@@ -285,7 +288,7 @@ segundaTelaCliente :: String -> String -> IO ()
 segundaTelaCliente x email
   | x == "1" = cadastraAnimal email
   | x == "2" = listarAnimais email
-  | x == "3" = menuHotelzinhoPet
+  | x == "3" = menuHotelzinhoPet email
   | x == "4" = removerAnimal email
   | x == "5" = agendaAnimal email
   | otherwise = invalidOption menuCliente
@@ -607,27 +610,36 @@ logarComoCliente = do
       putStrLn "Nenhum cliente não cadastrado. Por favor, cadastre-se"
       cadastrarComoCliente
 
-menuHotelzinhoPet :: IO ()
-menuHotelzinhoPet = do
+menuHotelzinhoPet :: String -> IO ()
+menuHotelzinhoPet email = do
   putStrLn "O Hotelzinho Pet é o serviço de hospedagem de animaizinhos!"
   putStrLn "Você deseja hospedar algum animalzinho no nosso serviço?"
   putStrLn "1 - Agendar animal"
   putStrLn "Caso não tenha interesse, prima qualquer outra tecla"
 
   opcao <- getLine
-  segundaOpcaoHotelzinho opcao
+  lerOpcaoHotelzinho opcao email
 
-segundaOpcaoHotelzinho :: String -> IO ()
-segundaOpcaoHotelzinho x
-  | x == "1" = agendaHotelzinho
-  | otherwise = invalidOption menuAdm
+lerOpcaoHotelzinho :: String -> String -> IO ()
+lerOpcaoHotelzinho x email
+  | x == "1" = agendaHotelzinho email
+  | otherwise = do
+      putStrLn "Servico de hotelzinho cancelado"
+      segundoMenuCliente email
 
-agendaHotelzinho :: IO ()
-agendaHotelzinho = do
-  file <- openFile "agendamentos.txt" ReadMode
-  disponibilidade <- hGetContents file
 
-  if disponibilidade == "disponível"
+obterDisponibilidade :: DisponibilidadeHotelzinho -> Bool
+obterDisponibilidade DisponibilidadeHotelzinho {disponibilidade = d} = d
+    
+
+agendaHotelzinho:: String -> IO ()
+agendaHotelzinho email = do
+  file <- openFile "disponibilidadeHotelzinho.txt" ReadMode
+  disponibilidadeContent <- hGetContents file
+  let disponibilidade = read disponibilidadeContent :: DisponibilidadeHotelzinho
+  
+
+  if obterDisponibilidade disponibilidade
     then do
       file <- openFile "hotelzinho.txt" WriteMode
       putStrLn "\nInsira a especie do animalzinho a ser hospedado: "
@@ -649,7 +661,7 @@ agendaHotelzinho = do
       putStrLn ""
       showMenu
     else do
-      putStrLn "Infelizmente o serviço de hotelzinho não está disponível para receber animaizinhos no momento."
+      putStrLn "Infelizmente o serviço de hotelzinho não está disponível no momento. Tente novamente mais tarde!"
 
       putStrLn "Cliente não cadastrado."
       putStrLn "Deseja fazer o cadastro agora? (s/n):"
