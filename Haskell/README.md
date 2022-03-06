@@ -7,3 +7,7 @@
 2. Agora basta rodar o programa e então executar o main:
 * `ghci main.hs`
 * `main`
+
+```diff
+Aviso: os arquivos txt devem ser alterados apenas através do programa, não deve-se fazer isso manualmente.
+```
