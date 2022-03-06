@@ -738,8 +738,25 @@ removerAnimal emailDonoDoAnimal = do
           removeFile "animais.txt"
           let novaListaDeAnimais = [read x :: Animal | x <- animais, not (encontrarAnimalASerRemovido (read x :: Animal) nomeAnimal emailDonoDoAnimal)]
           atualizaAnimais novaListaDeAnimais
+          removerAgendamentosDeUmAnimal emailDonoDoAnimal nomeAnimal
+
+          putStrLn "Animmal Removido com sucesso e agendamentos pendentes desse animal cancelados!"
   segundoMenuCliente emailDonoDoAnimal
 
+
+removerAgendamentosDeUmAnimal :: String -> String -> IO ()
+removerAgendamentosDeUmAnimal emailDoCliente nomeAnimal = do
+  agendamentosCadastrados <- doesFileExist "agendamentos.txt"
+  if not agendamentosCadastrados
+    then do
+      putStrLn "Animal não possuia agendamentos!"
+    else do
+      agendamentosContent <- readFile "agendamentos.txt"
+      let agendamentos = lines agendamentosContent
+
+      removeFile "agendamentos.txt"
+      let novaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos, verificaAgendamentoASerRemovido (read x :: Agendamento) emailDoCliente nomeAnimal]
+      atualizarAgendamentos novaListaDeAgendamentos
 
 ------------------------------------
 
@@ -964,3 +981,8 @@ obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, conclui
   | prop == "animal" = a
   | prop == "servicos" = s
   | prop == "email" = e
+
+verificaAgendamentoASerRemovido:: Agendamento -> String -> String -> Bool
+verificaAgendamentoASerRemovido agendamento emailDoDono nomeDoAnimal = do
+  obterAgendamento agendamento "animal" == nomeDoAnimal && obterAgendamento agendamento "email" == emailDoDono && obterAgendamentoStatusDeConcluido agendamento
+
