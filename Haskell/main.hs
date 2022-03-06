@@ -291,6 +291,7 @@ segundaTelaCliente x email
   | x == "3" = menuHotelzinhoPet
   | x == "4" = removerAnimal email
   | x == "5" = agendaAnimal email
+  | x == "x" = segundoMenuCliente email
   | otherwise = invalidOption menuCliente
 
 indexCliente :: [Cliente] -> String -> Int -> Int
@@ -311,7 +312,7 @@ listarAnimais emailCliente = do
   let animais = map converterEmAnimal animaisStr
 
   mostrarAnimaisDoCliente emailCliente animais
-  showMenu
+  segundoMenuCliente emailCliente
 
 mostrarAnimaisDoCliente :: String -> [Animal] -> IO ()
 mostrarAnimaisDoCliente emailCliente [] = do
@@ -360,7 +361,7 @@ cadastraAnimal email = do
   appendFile "animais.txt" (show animal ++ "\n")
 
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
-  showMenu
+  segundoMenuCliente email
 
 agendaAnimal :: String -> IO()
 agendaAnimal email = do
@@ -416,7 +417,7 @@ agendarAgendamento email servico = do
           removeFile "agendamentos.txt"
           atualizarAgendamentos novaListaDeAgendamentos
           putStrLn "\nAgendamento Cadastrado com sucessos!\n"
-  showMenu
+  segundoMenuCliente email
 
 atualizarAgendamentos :: [Agendamento] -> IO ()
 atualizarAgendamentos [] = putStrLn "Agendamentos atualizados com sucesso!\n"
@@ -446,7 +447,7 @@ verificaSeJaExisteUmAnimalCadastrado nome email = do
     if resposta == "s" then do
       hClose animaisFile
       cadastraAnimal email
-    else showMenu
+    else segundoMenuCliente email
   else putStr ""
 
 imprimeClientesCadastrados :: [Cliente] -> Int -> IO ()
@@ -487,7 +488,7 @@ removerCliente = do
           atualizaClientes novaListaDeClientes
           removerAnimaisDeUmCliente email
 
-  showMenu
+  menuAdm
 
 atualizaClientes :: [Cliente] -> IO ()
 atualizaClientes [] = putStrLn "Cliente removido com sucesso!\n"
@@ -568,7 +569,7 @@ cadastrarComoCliente = do
       if hasThisClient
         then do
           putStrLn "Usuario ja existente"
-          showMenu
+          menuCliente
         else do
           criarCliente nome email senha telefone
     else do
@@ -580,7 +581,7 @@ criarCliente nome email senha telefone = do
   file <- appendFile "clientes.txt" (show cliente ++ "\n")
   putStrLn "\nCliente cadastrado com sucesso!"
   putStrLn ""
-  showMenu
+  menuCliente
 
 logarComoCliente :: IO ()
 logarComoCliente = do
@@ -667,7 +668,7 @@ verContatoDoAdministrador = do
   let admin = read adminContent :: Admin
   putStrLn (obterAdmin admin "telefone")
 
-  showMenu
+  menuCliente
 
 removerAnimal :: String -> IO ()
 removerAnimal emailDonoDoAnimal = do
@@ -690,7 +691,7 @@ removerAnimal emailDonoDoAnimal = do
           removeFile "animais.txt"
           let novaListaDeAnimais = [read x :: Animal | x <- animais, not (encontrarAnimalASerRemovido (read x :: Animal) nomeAnimal emailDonoDoAnimal)]
           atualizaAnimais novaListaDeAnimais
-  showMenu
+  segundoMenuCliente emailDonoDoAnimal
 
 removerAnimaisDeUmCliente :: String -> IO ()
 removerAnimaisDeUmCliente emailDoCliente = do
@@ -741,7 +742,7 @@ editarAnimal = do
   atualizaAnimais novaListaDeAnimais
   appendFile "animais.txt" ("\n" ++ show animalEditado)
 
-  showMenu
+  menuAdm
 
 verificaSeAnimalEClienteExistem:: String -> String -> IO ()
 verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
@@ -752,7 +753,7 @@ verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
 
   if not hasCliente then do
     putStrLn ("O cliente '" ++ emailCliente ++ "' não existe. Verifique se o email foi digitado corretamente!")
-    showMenu
+    menuAdm
   else do
     animaisContent <- readFile "animais.txt"
     let animais = lines animaisContent
@@ -761,7 +762,7 @@ verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
 
     if not hasAnimal then do
       putStrLn ("O cliente '" ++ emailCliente ++ "' não possui o animal '" ++ nomeAnimal ++ "' cadastrado!")
-      showMenu
+      menuAdm
     else putStr ""
 
 encontrarAnimalASerRemovido :: Animal -> String -> String -> Bool
@@ -831,7 +832,7 @@ remarcarDataDoAgendamento = do
         removeFile "agendamentos.txt"
         atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
         putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
-  showMenu
+  menuAdm
 
 encontrarAgendamento :: [Agendamento] -> Int -> Bool
 encontrarAgendamento [] agendamentoId = False
