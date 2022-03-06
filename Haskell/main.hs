@@ -138,7 +138,7 @@ opcaoAdm x
   | x == "1" = verClientesCadastrados
   | x == "2" = removerCliente
   | x == "3" = alterarDisponibilidadeHotelzinho
-  | x == "4" = listarResumoDeAtendimentosRealizados
+  | x == "4" = listarResumoDeAtendimentos
   | x == "5" = atualizarContatoAdm
   | x == "6" = editarAnimal
   | x == "7" = remarcarDataDoAgendamento
@@ -177,7 +177,7 @@ menuAdm = do
   putStrLn "1 - Ver usuários cadastrados no sistema"
   putStrLn "2 - Remover usuários"
   putStrLn "3 - Alterar disponibilidade hotelzinho"
-  putStrLn "4 - listar resumo de atendimentos realizados"
+  putStrLn "4 - listar resumo de atendimentos"
   putStrLn "5 - Atualizar contato Adm"
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
@@ -185,11 +185,32 @@ menuAdm = do
   opcao <- getLine
   opcaoAdm opcao
 
-listarResumoDeAtendimentosRealizados :: IO ()
-listarResumoDeAtendimentosRealizados = do
+listarResumoDeAtendimentos :: IO ()
+listarResumoDeAtendimentos = do
   file <- openFile "agendamentos.txt" ReadMode
   contents <- hGetContents file
-  print (show contents)
+
+  let agendamentosStr = lines contents
+  let agendamentos = map converterEmAgendamento agendamentosStr
+
+  mostrarAgendamentos agendamentos
+  menuAdm
+
+mostrarAgendamentos:: [Agendamento] -> IO()
+mostrarAgendamentos [] = do
+    putStrLn ""
+mostrarAgendamentos (a:as) = do
+    putStrLn ("Serviço: " ++ obterAgendamento a "servicos")
+    putStrLn ("email: " ++ obterAgendamento a "email")
+    putStrLn ("data: " ++ obterAgendamento a "date")
+    putStrLn ("animal: " ++ obterAgendamento a "animal")
+    putStrLn ("Status: " ++ show (obterAgendamentoStatusDeConcluido a))
+    putStrLn ("ID: " ++ show (obterAgendamentoId a ))
+    mostrarAgendamentos as
+
+
+converterEmAgendamento:: String -> Agendamento
+converterEmAgendamento a = read a :: Agendamento
 
 alterarDisponibilidadeHotelzinho :: IO ()
 alterarDisponibilidadeHotelzinho = do
@@ -305,6 +326,7 @@ indexCliente (c : cs) email i
 
 converterEmAnimal :: String -> Animal
 converterEmAnimal a = read a :: Animal
+
 
 listarAnimais :: String -> IO ()
 listarAnimais emailCliente = do
@@ -818,6 +840,7 @@ makeAgendamentoId [] = 0
 makeAgendamentoId [agendamento] = obterAgendamentoId agendamento + 1
 makeAgendamentoId (agendamento : resto) = do
   makeAgendamentoId resto
+
 
 obterAgendamentoId :: Agendamento -> Int
 obterAgendamentoId (Agendamento id _ _ _ _ _) = id
