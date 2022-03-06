@@ -1,6 +1,10 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use newtype instead of data" #-}
 
 import Data.Char (isDigit, toLower)
+import qualified Distribution.Compat.CharParsing as DisponibilidadeHotelzinho
 import System.Directory (doesFileExist, removeFile)
 import System.IO
   ( IO,
@@ -17,12 +21,9 @@ import System.IO
   )
 import System.IO.Error ()
 import Prelude hiding (catch)
-import qualified Distribution.Compat.CharParsing as DisponibilidadeHotelzinho
-
 
 data DisponibilidadeHotelzinho = DisponibilidadeHotelzinho
-  { disponibilidade :: Bool
-  }
+  {disponibilidade :: Bool}
   deriving (Read, Show)
 
 data Animal = Animal
@@ -125,19 +126,6 @@ acessoAdm = do
           acessoAdm
         else showMenu
 
-opcaoAdm :: String -> IO ()
-opcaoAdm x
-  | x == "1" = verClientesCadastrados
-  | x == "2" = removerCliente
-  | x == "3" = alterarDisponibilidadeHotelzinho
-  | x == "4" = listarResumoDeAtendimentos
-  | x == "5" = atualizarContatoAdm
-  | x == "6" = editarAnimal
-  | x == "7" = remarcarDataDoAgendamento
-  | x == "8" = marcarServicoComoConcluido
-  | x == "0" = showMenu
-  | otherwise = invalidOption menuAdm
-
 obterCliente :: Cliente -> String -> String
 obterCliente Cliente {nomeCliente = n, email = e, senha = s, telefone = t} prop
   | prop == "nomeCliente" = n
@@ -174,10 +162,25 @@ menuAdm = do
   putStrLn "5 - Atualizar contato Adm"
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
-  putStrLn "8 - Marcar um servico como concluido"
+  putStrLn "8 - Ver serviços agendados pendentes"
+  putStrLn "9 - Marcar um servico como concluido"
   putStrLn "0 - Voltar"
   opcao <- getLine
   opcaoAdm opcao
+
+opcaoAdm :: String -> IO ()
+opcaoAdm x
+  | x == "1" = verClientesCadastrados
+  | x == "2" = removerCliente
+  | x == "3" = alterarDisponibilidadeHotelzinho
+  | x == "4" = listarResumoDeAtendimentos
+  | x == "5" = atualizarContatoAdm
+  | x == "6" = editarAnimal
+  | x == "7" = remarcarDataDoAgendamento
+  | x == "8" = listarAgendamentosPendentes
+  | x == "9" = marcarServicoComoConcluido
+  | x == "0" = showMenu
+  | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO ()
 listarResumoDeAtendimentos = do
@@ -202,15 +205,16 @@ opcaoHotelzinho x
 
 ativaDesativaHotelzinho :: Bool -> IO ()
 ativaDesativaHotelzinho x = do
-    removeFile "disponibilidadeHotelzinho.txt"
-    disponibilidadeFile <- openFile "disponibilidadeHotelzinho.txt" WriteMode
+  removeFile "disponibilidadeHotelzinho.txt"
+  disponibilidadeFile <- openFile "disponibilidadeHotelzinho.txt" WriteMode
 
-    let disponibilidade = DisponibilidadeHotelzinho {
-        disponibilidade = x
-    }
-    hPutStr disponibilidadeFile (show disponibilidade)
-    hFlush disponibilidadeFile
-    hClose disponibilidadeFile
+  let disponibilidade =
+        DisponibilidadeHotelzinho
+          { disponibilidade = x
+          }
+  hPutStr disponibilidadeFile (show disponibilidade)
+  hFlush disponibilidadeFile
+  hClose disponibilidadeFile
 
 atualizarContatoAdm :: IO ()
 atualizarContatoAdm = do
@@ -359,6 +363,33 @@ cadastraAnimal email = do
 
   putStrLn "\nAnimal Cadastrado com sucessos!\n"
   segundoMenuCliente email
+
+converterEmAgendamento a = read a :: Agendamento
+
+listarAgendamentosPendentes :: IO ()
+listarAgendamentosPendentes = do
+  file <- openFile "agendamentos.txt" ReadMode
+  contents <- hGetContents file
+
+  let agendamentosStr = lines contents
+  let agendamentos = map converterEmAgendamento agendamentosStr
+
+  mostrarAgendamentosPendentes agendamentos
+  showMenu
+
+mostrarAgendamentosPendentes :: [Agendamento] -> IO ()
+mostrarAgendamentosPendentes [] = do
+  putStrLn ""
+mostrarAgendamentosPendentes (a : as) = do
+  if obterAgendamentoStatusDeConcluido a
+    then do
+      mostrarAgendamentosPendentes as
+    else do
+      putStrLn ("Nome: " ++ obterAgendamento a "animal")
+      putStrLn ("Data: " ++ obterAgendamento a "date")
+      putStrLn ("Servico: " ++ obterAgendamento a "servicos")
+      putStrLn ("Email do Dono: " ++ obterAgendamento a "email" ++ "\n")
+      mostrarAgendamentosPendentes as
 
 agendaAnimal :: String -> IO ()
 agendaAnimal email = do
@@ -623,20 +654,17 @@ lerOpcaoHotelzinho :: String -> String -> IO ()
 lerOpcaoHotelzinho x email
   | x == "1" = agendaHotelzinho email
   | otherwise = do
-      putStrLn "Servico de hotelzinho cancelado"
-      segundoMenuCliente email
-
+    putStrLn "Servico de hotelzinho cancelado"
+    segundoMenuCliente email
 
 obterDisponibilidade :: DisponibilidadeHotelzinho -> Bool
 obterDisponibilidade DisponibilidadeHotelzinho {disponibilidade = d} = d
-    
 
-agendaHotelzinho:: String -> IO ()
+agendaHotelzinho :: String -> IO ()
 agendaHotelzinho email = do
   file <- openFile "disponibilidadeHotelzinho.txt" ReadMode
   disponibilidadeContent <- hGetContents file
   let disponibilidade = read disponibilidadeContent :: DisponibilidadeHotelzinho
-  
 
   if obterDisponibilidade disponibilidade
     then do
