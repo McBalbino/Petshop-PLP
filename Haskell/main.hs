@@ -4,7 +4,7 @@ import Control.Applicative ()
 import Control.Exception ()
 import Control.Monad
 import qualified Data.ByteString.Char8 as B
-import Data.Char (toLower)
+import Data.Char (toLower, isDigit)
 import Data.List ()
 import Data.Time.Clock ()
 import Distribution.PackageDescription (CondTree (condTreeComponents))
@@ -161,8 +161,9 @@ menuAdm = do
   putStrLn "3 - Alterar disponibilidade hotelzinho"
   putStrLn "4 - listar resumo de atendimentos"
   putStrLn "5 - Atualizar contato Adm"
-  putStrLn "6 - EditarDadosDeUmAnimal"
-  putStrLn "7 - Voltar"
+  putStrLn "6 - Editar dados de um animal"
+  putStrLn "7 - Remarcar data de um agendamento"
+  putStrLn "8 - Voltar"
   opcao <- getLine
   opcaoAdm opcao
 
@@ -174,7 +175,8 @@ opcaoAdm x
   | x == "4" = listarResumoDeAtendimentos
   | x == "5" = atualizarContatoAdm
   | x == "6" = editarAnimal
-  | x == "7" = showMenu
+  | x == "7" = remarcarDataDoAgendamento
+  | x == "8" = showMenu
   | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO ()
@@ -402,16 +404,15 @@ agendarAgendamento email servico = do
         then do
           putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
         else do
-          file <- openFile "agendamentos.txt" ReadMode
-          agendamentosContent <- hGetContents file
-          let agendamentos = lines agendamentosContent
-          let agendamentoId = makeAgendamentoId [read x :: Agendamento | x <- agendamentos]
+          agendamentosContent <- readFile "agendamentos.txt"
+          let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
+          let agendamentoId = makeAgendamentoId agendamentos
 
           let agendamento = Agendamento {agendamentoId = agendamentoId, animal = nome, date = dataAtendimento, servicos = servico, concluido = False, emailDoDono = email}
-          
-          let antigaListaDeAgendamentos = [read x :: Agendamento | x <- agendamentos];
+
+          let antigaListaDeAgendamentos = agendamentos;
           let novaListaDeAgendamentos = antigaListaDeAgendamentos ++ [agendamento]
-          
+
           removeFile "agendamentos.txt"
           atualizarAgendamentos novaListaDeAgendamentos
           putStrLn "\nAgendamento Cadastrado com sucessos!\n"
@@ -780,17 +781,6 @@ atualizaAnimais (x : xs) = do
     else appendFile "animais.txt" ("\n" ++ show x)
   atualizaAnimais xs
 
--- makeAgendamentoId:: IO Int
--- makeAgendamentoId = do
-  -- file <- openFile "agendamentos.txt" ReadMode
-  -- agendamentosContent <- hGetContents file
-  -- let agendamentos = lines agendamentosContent
-
---   let ultimoAgendamentoId = getUltimoAgendamentoId [read x :: Agendamento | x <- agendamentos]
-
---   hClose file
---   return (ultimoAgendamentoId + 1)
-
 makeAgendamentoId:: [Agendamento] -> Int
 makeAgendamentoId [] = 0
 makeAgendamentoId [agendamento] = obterAgendamentoId agendamento + 1
@@ -800,8 +790,69 @@ makeAgendamentoId (agendamento:resto) = do
 obterAgendamentoId :: Agendamento -> Int
 obterAgendamentoId (Agendamento id _ _ _ _ _) = id
 
+obterAgendamentoStatusDeConcluido :: Agendamento -> Bool
+obterAgendamentoStatusDeConcluido (Agendamento _ _ _ status _ _) = status
+
+remarcarDataDoAgendamento:: IO()
+remarcarDataDoAgendamento = do
+  putStr "Digite o id do agendamento que será remarcado: "
+  id <- getLine
+
+  if not (all isDigit id) then do
+    putStrLn "Formato inválido! Digite um número!"
+    remarcarDataDoAgendamento
+  else do
+    agendamentosContent <- readFile "agendamentos.txt"
+    let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
+    let hasAgendamento = encontrarAgendamento agendamentos (read id :: Int)
+
+    if not hasAgendamento then do
+      putStrLn ("Agendamento com id '" ++ id ++ "' não existe!")
+      remarcarDataDoAgendamento
+    else do
+      let agendamentoDados = encontraERetornaAgendamento agendamentos (read id :: Int)
+
+      if obterAgendamentoStatusDeConcluido agendamentoDados then do
+        putStrLn "Esse atendimento já foi realizado e não pode ter sua data alterada!"
+        remarcarDataDoAgendamento
+      else do
+        putStr "Nova data do atendimento: "
+        novaData <- getLine
+
+        let novoAgendamento = Agendamento {
+          agendamentoId = obterAgendamentoId agendamentoDados,
+          animal = obterAgendamento agendamentoDados "animal",
+          date = novaData,
+          servicos = obterAgendamento agendamentoDados "servicos",
+          concluido = False,
+          emailDoDono = obterAgendamento agendamentoDados "email"
+        }
+
+        removeFile "agendamentos.txt"
+        atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
+        putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
+  showMenu
+
+encontrarAgendamento :: [Agendamento] -> Int -> Bool
+encontrarAgendamento [] agendamentoId = False
+encontrarAgendamento (c : cs) agendamentoId
+  | obterAgendamentoId c == agendamentoId = True
+  | obterAgendamentoId c /= agendamentoId = encontrar
+  where
+    encontrar = encontrarAgendamento cs agendamentoId
+
+encontraERetornaAgendamento :: [Agendamento] -> Int -> Agendamento
+encontraERetornaAgendamento (c : cs) agendamentoId
+  | obterAgendamentoId c == agendamentoId = c
+  | obterAgendamentoId c /= agendamentoId = encontrar
+  where
+    encontrar = encontraERetornaAgendamento cs agendamentoId
+
+
 obterAgendamento :: Agendamento -> String -> String
-obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, concluido = c, animal = a} prop
+obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, concluido = c, animal = a, emailDoDono = e} prop
   | prop == "date" = d
+  | prop == "animal" = a
   | prop == "servicos" = s
   | prop == "animal" = a
+  | prop == "email" = e
