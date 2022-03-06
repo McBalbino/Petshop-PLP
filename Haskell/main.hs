@@ -60,6 +60,14 @@ data Agendamento = Agendamento
   }
   deriving (Read, Show)
 
+data Hospedagem = Hospedagem
+  { prazoDeHospedagem :: String,
+    animalHospedado :: Animal,
+    contatoDoDono :: String
+  }
+  deriving (Read, Show)
+
+
 printLine :: IO ()
 printLine = putStrLn "\n------------------------------------------"
 
@@ -130,7 +138,7 @@ opcaoAdm x
   | x == "1" = verClientesCadastrados
   | x == "2" = removerCliente
   | x == "3" = alterarDisponibilidadeHotelzinho
-  | x == "4" = listarResumoDeAtendimentos
+  | x == "4" = listarResumoDeAtendimentosRealizados
   | x == "5" = atualizarContatoAdm
   | x == "6" = editarAnimal
   | x == "7" = remarcarDataDoAgendamento
@@ -169,7 +177,7 @@ menuAdm = do
   putStrLn "1 - Ver usuários cadastrados no sistema"
   putStrLn "2 - Remover usuários"
   putStrLn "3 - Alterar disponibilidade hotelzinho"
-  putStrLn "4 - listar resumo de atendimentos"
+  putStrLn "4 - listar resumo de atendimentos realizados"
   putStrLn "5 - Atualizar contato Adm"
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
@@ -177,8 +185,8 @@ menuAdm = do
   opcao <- getLine
   opcaoAdm opcao
 
-listarResumoDeAtendimentos :: IO ()
-listarResumoDeAtendimentos = do
+listarResumoDeAtendimentosRealizados :: IO ()
+listarResumoDeAtendimentosRealizados = do
   file <- openFile "agendamentos.txt" ReadMode
   contents <- hGetContents file
   print (show contents)
@@ -635,38 +643,52 @@ agendaHotelzinho email = do
   disponibilidadeContent <- hGetContents file
   let disponibilidade = read disponibilidadeContent :: DisponibilidadeHotelzinho
   
-
   if obterDisponibilidade disponibilidade
     then do
-      file <- openFile "hotelzinho.txt" WriteMode
-      putStrLn "\nInsira a especie do animalzinho a ser hospedado: "
-      especie <- getLine
-      putStrLn "\nInsira o nome do animalzinho "
-      nome <- getLine
-      putStrLn "\nQual o período de tempo que o animalzinho vai ficar hospedado?: "
-      tempo <- getLine
-      file <- appendFile "animais.txt" "especie: "
-      file <- appendFile "animais.txt" especie
-      file <- appendFile "animais.txt" "; "
-      file <- appendFile "animais.txt" "nome: "
-      file <- appendFile "animais.txt" nome
-      file <- appendFile "animais.txt" "; "
-      file <- appendFile "animais.txt" "período de tempo: "
-      file <- appendFile "animais.txt" tempo
-      file <- appendFile "animais.txt" "\n"
-      putStrLn "\nAnimal agendado com sucesso"
-      putStrLn ""
-      showMenu
+      putStrLn "Aqui estão os seus animais:\n"
+      listarAnimais email
+
+      putStrLn "----------------------------------------------------------------"
+      putStrLn "Insira o nome do animal que você deseja hospedar no hotelzinho: "
+
+      nomeDoAnimal <- getLine
+      animaisContent <- readFile "animais.txt"
+      
+      let animais = lines animaisContent
+      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeDoAnimal email
+
+      if not hasAnimal
+        then do
+          putStrLn "\nAVISO!"
+          putStrLn ("O cliente '" ++ email ++ "' não possui o animal '" ++ nomeDoAnimal ++ "' cadastrado!\n")
+          putStrLn "Retornando ao menu principal...\n"
+          segundoMenuCliente email
+        else do
+            putStr "Até que dia você deseja fazer a reserva do hotelzinho pet? inserir em formato DIA/MES/ANO"
+            periodo <- getLine
+            
+            animaisContents <- readFile "animais.txt"
+            let animais = lines animaisContents
+
+            agendarAnimalNoHotelzinho (encontraERetornaAnimal [read x :: Animal | x <- animais] nomeDoAnimal email) email periodo
+
     else do
       putStrLn "Infelizmente o serviço de hotelzinho não está disponível no momento. Tente novamente mais tarde!"
+      segundoMenuCliente email
 
-      putStrLn "Cliente não cadastrado."
-      putStrLn "Deseja fazer o cadastro agora? (s/n):"
-      op <- getLine
-      if op == "s"
-        then do
-          cadastrarComoCliente
-        else menuCliente
+
+agendarAnimalNoHotelzinho :: Animal -> String -> String -> IO ()
+agendarAnimalNoHotelzinho animal email periodo = do
+  let hospedagem = Hospedagem {prazoDeHospedagem  = periodo, animalHospedado  = animal, contatoDoDono = email}
+  file <- appendFile "hospedagem.txt" (show hospedagem ++ "\n")
+  putStrLn "|-------------------------------------------|"
+  putStrLn "|Reserva de hospedagem efetuada com sucesso!|"
+  putStrLn "|-------------------------------------------|"
+
+  segundoMenuCliente email
+
+
+
 
 verContatoDoAdministrador :: IO ()
 verContatoDoAdministrador = do
