@@ -227,12 +227,26 @@ opcaoContato x
 
 mudaContato :: IO ()
 mudaContato = do
-  putStrLn "\nInsira o novo número para contato abaixo"
 
-  numero <- getLine
-  file <- openFile "contato.txt" WriteMode
-  hPutStr file numero
-  hClose file
+  adminContent <- readFile "admin.txt"
+  let adminDados = read adminContent :: Admin
+
+  putStr "\nInsira o novo número de contato: "
+  novoNumero <- getLine
+
+  removeFile "admin.txt" 
+  adminFile <- openFile "admin.txt" WriteMode
+
+  let admin = Admin {
+    nomeAdmin = obterAdmin adminDados "nome",
+    senhaAdmin = obterAdmin adminDados "senha",
+    telefoneAdmin = novoNumero
+  }
+
+  hPutStr adminFile (show admin)
+  hFlush adminFile
+  hClose adminFile
+
   putStrLn "\nContato atualizado com sucesso!"
   menuAdm
 
