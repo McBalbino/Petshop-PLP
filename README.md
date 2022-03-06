@@ -3,6 +3,9 @@ Projeto da disciplina de Paradigmas de Linguagens de Programação, da Universid
 </p>
 Petshop é um programa de gerenciamento de um petshop. O sistema possui dois tipos de usuários: o administrador e o cliente. O administrador tem privilégios maiores sobre o programa, como poder ver os usuários cadastrados no sistema e remover usuários, por exemplo. Já o cliente pode fazer tarefas mais individuais como cadastrar animais e realizar agendamentos.
 
+## Executáveis do projeto
+[Haskell](https://github.com/McBalbino/Petshop-PLP/tree/main/Haskell)
+
 ## Funcionalidades de cada usuário
 * **Administrador**
   * Ver usuários cadastrados no sistema
