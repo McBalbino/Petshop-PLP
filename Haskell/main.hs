@@ -56,7 +56,8 @@ data Agendamento = Agendamento
   { date :: String,
     servicos :: String,
     concluido :: Bool,
-    animal :: String
+    animal :: String,
+    emailDoDono :: String
   }
   deriving (Read, Show)
 
@@ -379,7 +380,7 @@ agendarConsulta email = do
       if not hasAnimal then do
           putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
         else do
-          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Consulta Veterinaria", concluido = False}
+          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Consulta Veterinaria", concluido = False, emailDoDono = email}
           appendFile "agendamentos.txt" (show agendamentos ++ "\n")
           putStrLn "\nAgendamento Cadastrado com sucessos!\n"
     
@@ -407,7 +408,7 @@ agendarBanhoTosa email = do
         then do
           putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
         else do
-          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Banho e Tosa", concluido = False}
+          let agendamentos = Agendamento {animal = nome, date = dataAtendimento, servicos = "Banho e Tosa", concluido = False, emailDoDono = email}
           appendFile "agendamentos.txt" (show agendamentos ++ "\n")
           putStrLn "\nAgendamento Cadastrado com sucessos!\n"
     
