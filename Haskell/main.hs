@@ -163,7 +163,7 @@ menuAdm = do
   putStrLn "5 - Atualizar contato Adm"
   putStrLn "6 - Editar dados de um animal"
   putStrLn "7 - Remarcar data de um agendamento"
-  putStrLn "8 - Voltar"
+  putStrLn "x - Voltar"
   opcao <- getLine
   opcaoAdm opcao
 
@@ -176,7 +176,7 @@ opcaoAdm x
   | x == "5" = atualizarContatoAdm
   | x == "6" = editarAnimal
   | x == "7" = remarcarDataDoAgendamento
-  | x == "8" = showMenu
+  | x == "x" = showMenu
   | otherwise = invalidOption menuAdm
 
 listarResumoDeAtendimentos :: IO ()
@@ -259,7 +259,7 @@ menuCliente = do
   putStrLn "1 - Se cadastrar como cliente"
   putStrLn "2 - Logar no sistema como cliente"
   putStrLn "3 - Ver contato do administrador"
-  putStrLn "4 - Voltar ao menu principal"
+  putStrLn "x - Voltar ao menu principal"
   opcao <- getLine
   opcaoCliente opcao
 
@@ -268,7 +268,7 @@ opcaoCliente x
   | x == "1" = cadastrarComoCliente
   | x == "2" = logarComoCliente
   | x == "3" = verContatoDoAdministrador
-  | x == "4" = showMenu
+  | x == "x" = showMenu
   | otherwise = invalidOption menuCliente
 
 segundoMenuCliente :: String -> IO ()
