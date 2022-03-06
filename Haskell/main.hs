@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# LANGUAGE BlockArguments #-}
 
 import Data.Char (isDigit, toLower)
 import System.Directory (doesFileExist, removeFile)
@@ -302,6 +303,8 @@ segundoMenuCliente email = do
   putStrLn "3 - Acessar Hotelzinho Pet"
   putStrLn "4 - Remover um animal"
   putStrLn "5 - Agendar serviço para animal"
+  putStrLn "6 - Ver agendamentos concluidos"
+  putStrLn "7 - Ver agendamentos ainda não concluidos"
   putStrLn "x - Retornar para o menu\n"
 
   opcao <- getLine
@@ -314,8 +317,38 @@ segundaTelaCliente x email
   | x == "3" = menuHotelzinhoPet email
   | x == "4" = removerAnimal email
   | x == "5" = agendaAnimal email
+  | x == "6" = agendamentosConcluidos True email
+  | x == "7" = agendamentosConcluidos False email
   | x == "x" = segundoMenuCliente email
   | otherwise = invalidOption menuCliente
+
+
+agendamentosConcluidos :: Bool -> String -> IO()
+agendamentosConcluidos status email = do 
+  file <- openFile "agendamentos.txt" ReadMode
+  contents <- hGetContents file
+
+  let agendamentosStr = lines contents
+  let agendamentos = map converterEmAgendamento agendamentosStr
+
+  mostrarAgendamentosDoCliente agendamentos email status
+  segundoMenuCliente email
+
+mostrarAgendamentosDoCliente:: [Agendamento] -> String-> Bool -> IO()
+mostrarAgendamentosDoCliente [] email status = do
+    putStrLn ""
+mostrarAgendamentosDoCliente (a:as) email status = do
+  if ((obterAgendamentoStatusDeConcluido a == status) && (obterAgendamento a "email" == email)) then do 
+    putStrLn ("Serviço: " ++ (obterAgendamento a "servicos"))
+    putStrLn ("email: " ++ obterAgendamento a "email")
+    putStrLn ("data: " ++ obterAgendamento a "date")
+    putStrLn ("animal: " ++ obterAgendamento a "animal")
+    putStrLn ("Status: " ++ (show (obterAgendamentoStatusDeConcluido a)))
+    mostrarAgendamentosDoCliente as email status
+    else
+    mostrarAgendamentosDoCliente as email status
+
+
 
 indexCliente :: [Cliente] -> String -> Int -> Int
 indexCliente (c : cs) email i
