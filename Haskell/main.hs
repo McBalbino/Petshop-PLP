@@ -4,7 +4,7 @@ import Control.Applicative ()
 import Control.Exception ()
 import Control.Monad
 import qualified Data.ByteString.Char8 as B
-import Data.Char ()
+import Data.Char (toLower)
 import Data.List ()
 import Data.Time.Clock ()
 import Distribution.PackageDescription (CondTree (condTreeComponents))
@@ -36,6 +36,14 @@ data Animal = Animal
   }
   deriving (Read, Show)
 
+data Admin = Admin
+  { nomeAdmin :: String,
+    senhaAdmin :: String,
+    telefoneAdmin :: String
+  }
+  deriving (Read, Show)
+
+
 data Cliente = Cliente
   { nomeCliente :: String,
     email :: String,
@@ -51,6 +59,9 @@ data Agendamento = Agendamento
     animal :: String
   }
   deriving (Read, Show)
+
+printLine :: IO()
+printLine = putStrLn "\n------------------------------------------"
 
 obterCliente :: Cliente -> String -> String
 obterCliente Cliente {nomeCliente = n, email = e, senha = s, telefone = t} prop
@@ -73,38 +84,75 @@ obterAnimal Animal {nomeAnimal = n, emailCliente = ec, especie = e, peso = p, al
 
 main :: IO ()
 main = do
+  printLine
   putStrLn "Boas vindas!"
-  putStrLn "Selecione uma das opções abaixo:\n"
   showMenu
 
 showMenu :: IO ()
 showMenu = do
+  printLine
   putStrLn "\nSelecione uma das opções abaixo:\n"
 
   putStrLn "1 - Sou Administrador"
   putStrLn "2 - Sou Cliente"
-  putStrLn "3 - Sair"
+  putStrLn "x - Sair"
+  printLine
 
+  putStr "Opção: "
   opcao <- getLine
   menus opcao
 
 menus :: String -> IO ()
 menus x
-  | x == "1" = menuAdm
+  | x == "1" = acessoAdm
   | x == "2" = menuCliente
-  | x == "3" = encerrarSessao
+  | x == "x" = encerrarSessao
   | otherwise = invalidOption showMenu
 
 encerrarSessao :: IO ()
-encerrarSessao = putStrLn "Saindo... Até a próxima!"
+encerrarSessao = do 
+  printLine
+  putStrLn "Saindo... Até a próxima!"
+  printLine
 
 invalidOption :: IO () -> IO ()
-invalidOption f = do
+invalidOption function = do
   putStrLn "Selecione uma alternativa válida"
-  f
+  function
+
+acessoAdm :: IO ()
+acessoAdm = do
+  printLine
+  putStrLn "\nFaça acesso como administrador"
+  putStr "Senha administrador: "
+  senha <- getLine
+
+  adminDados <- readFile "admin.txt"
+  let admin = read adminDados :: Admin
+
+  if obterAdmin admin "senha" == senha then do
+    menuAdm
+  else do
+    printLine
+    putStrLn "Senha inválida!"
+    putStr "Deseja tentar fazer login como administrador novamente! (s/n): "
+    opcao <- getChar
+
+    if toLower opcao == 's' then do
+      acessoAdm
+    else
+      showMenu
+ 
+obterAdmin :: Admin -> String -> String
+obterAdmin Admin {nomeAdmin = n, senhaAdmin = s, telefoneAdmin = t} prop
+  | prop == "nome" = n
+  | prop == "senha" = s
+  | prop == "telefone" = t
+
 
 menuAdm :: IO ()
 menuAdm = do
+  printLine
   putStrLn "\nSelecione uma das opções abaixo:"
   putStrLn "1 - Ver usuários cadastrados no sistema"
   putStrLn "2 - Remover usuários"
