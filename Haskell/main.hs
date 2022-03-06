@@ -421,7 +421,31 @@ listarResumoDeAtendimentos :: IO ()
 listarResumoDeAtendimentos = do
   file <- openFile "agendamentos.txt" ReadMode
   contents <- hGetContents file
-  print (show contents)
+  let agendamentos = [read x :: Agendamento | x <- lines contents]
+  imprimirResumosDeAtendimento agendamentos
+
+imprimirResumosDeAtendimento :: [Agendamento] -> IO()
+imprimirResumosDeAtendimento [] = do
+  putStrLn "Nenhum agendamento cadastrado"
+  putStrLn ""
+  printLine
+  showMenu
+imprimirResumosDeAtendimento [a] = do
+  imprimirAtendimento a
+  printLine
+  showMenu
+imprimirResumosDeAtendimento (a:as) = do
+  imprimirAtendimento a
+  imprimirResumosDeAtendimento as
+
+imprimirAtendimento :: Agendamento -> IO()
+imprimirAtendimento a = do
+  putStrLn ("Data: " ++ obterAgendamento a "date")
+  putStrLn ("Concluído: " ++ obterAgendamento a "concluido")
+  putStrLn ("Nome do animal: " ++ obterAgendamento a "animal")
+  putStrLn ("Dono: " ++ obterAgendamento a "emailDoDono")
+  putStrLn ("Serviços: " ++ obterAgendamento a "servicos")
+  putStrLn ""
 
 ativaDesativaHotelzinho :: Bool -> IO ()
 ativaDesativaHotelzinho x = do
@@ -535,7 +559,7 @@ mostrarAgendamentosPendentes (a : as) = do
       putStrLn ("Nome: " ++ obterAgendamento a "animal")
       putStrLn ("Data: " ++ obterAgendamento a "date")
       putStrLn ("Servico: " ++ obterAgendamento a "servicos")
-      putStrLn ("Email do Dono: " ++ obterAgendamento a "email" ++ "\n")
+      putStrLn ("Email do Dono: " ++ obterAgendamento a "emailDoDono" ++ "\n")
       mostrarAgendamentosPendentes as
 
 ------------------------------------
@@ -912,9 +936,7 @@ verificaSeAnimalEClienteExistem :: String -> String -> IO ()
 verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
   clientesContent <- readFile "clientes.txt"
   let clientes = lines clientesContent
-
   let hasCliente = encontraCliente [read x :: Cliente | x <- clientes] emailCliente ""
-
   if not hasCliente
     then do
       putStrLn ("O cliente '" ++ emailCliente ++ "' não existe. Verifique se o email foi digitado corretamente!")
@@ -979,8 +1001,9 @@ obterAgendamento :: Agendamento -> String -> String
 obterAgendamento Agendamento {agendamentoId = i, date = d, servicos = s, concluido = c, animal = a, emailDoDono = e} prop
   | prop == "date" = d
   | prop == "animal" = a
+  | prop == "concluido" = show c
   | prop == "servicos" = s
-  | prop == "email" = e
+  | prop == "emailDoDono" = e
 
 verificaAgendamentoASerRemovido:: Agendamento -> String -> String -> Bool
 verificaAgendamentoASerRemovido agendamento emailDoDono nomeDoAnimal = do
