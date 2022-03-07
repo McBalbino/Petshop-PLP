@@ -1,1 +1,1 @@
-DisponibilidadeHotelzinho {disponibilidade = True}
+DisponibilidadeHotelzinho {disponibilidade = False}
