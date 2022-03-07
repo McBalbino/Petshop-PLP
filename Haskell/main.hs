@@ -1075,23 +1075,28 @@ atualizarAgendamentos (x : xs) = do
 
 verificaSeJaExisteUmAnimalCadastrado :: String -> String -> IO ()
 verificaSeJaExisteUmAnimalCadastrado nome email = do
-  animaisFile <- openFile "animais.txt" ReadMode
-  animaisContent <- hGetContents animaisFile
-  let animais = lines animaisContent
-  let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
+  fileExist <- doesFileExist "animais.txt"
 
-  if hasAnimal
-    then do
-      putStrLn ("Você já possui um animal cadastrado com o nome '" ++ nome ++ "'.")
-      putStr "Deseja inserir os dados de cadastro de animal novamente? (s/n): "
-      resposta <- getLine
+  if not fileExist then do
+    animaisFile <- openFile "animais.txt" ReadMode
+    animaisContent <- hGetContents animaisFile
+    let animais = lines animaisContent
+    let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nome email
 
-      if resposta == "s"
-        then do
-          hClose animaisFile
-          cadastraAnimal email
-        else segundoMenuCliente email
-    else putStr ""
+    if hasAnimal
+      then do
+        putStrLn ("Você já possui um animal cadastrado com o nome '" ++ nome ++ "'.")
+        putStr "Deseja inserir os dados de cadastro de animal novamente? (s/n): "
+        resposta <- getLine
+
+        if resposta == "s"
+          then do
+            hClose animaisFile
+            cadastraAnimal email
+          else segundoMenuCliente email
+      else putStr ""
+  else do
+    putStr ""
 
 obterEmail :: Cliente -> String
 obterEmail Cliente {nomeCliente = c, email = e, senha = s, telefone = t} = e
