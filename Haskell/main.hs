@@ -286,13 +286,19 @@ imprimeClientesCadastrados (x : xs) n = do
 
 verClientesCadastrados :: IO ()
 verClientesCadastrados = do
-  file <- openFile "clientes.txt" ReadMode
-  contents <- hGetContents file
-  let clientes = lines contents
+  arquivoExiste <- doesFileExist "clientes.txt"
 
-  printLine
-  imprimeClientesCadastrados [read x :: Cliente | x <- clientes] 0
+  if arquivoExiste then do
+    file <- openFile "clientes.txt" ReadMode
+    contents <- hGetContents file
+    let clientes = lines contents
+
+    printLine
+    imprimeClientesCadastrados [read x :: Cliente | x <- clientes] 0
+  else do
+    putStrLn "\nNão há clientes cadastrados."
   menuAdm
+
 
 removerCliente :: IO ()
 removerCliente = do
@@ -374,38 +380,42 @@ remarcarDataDoAgendamento = do
         putStrLn "Formato inválido! Digite um número!"
         remarcarDataDoAgendamento
       else do
-        agendamentosContent <- readFile "agendamentos.txt"
-        let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
-        let hasAgendamento = encontrarAgendamento agendamentos (read id :: Int)
+        arquivoExiste <- doesFileExist "agendamentos.txt"
+        if not arquivoExiste then do
+          putStrLn "\nNão existem agendamentos à serem remarcados"
+        else do
+          agendamentosContent <- readFile "agendamentos.txt"
+          let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
+          let hasAgendamento = encontrarAgendamento agendamentos (read id :: Int)
 
-        if not hasAgendamento
-          then do
-            putStrLn ("Agendamento com id '" ++ id ++ "' não existe!")
-            remarcarDataDoAgendamento
-          else do
-            let agendamentoDados = encontraERetornaAgendamento agendamentos (read id :: Int)
+          if not hasAgendamento
+            then do
+              putStrLn ("Agendamento com id '" ++ id ++ "' não existe!")
+              remarcarDataDoAgendamento
+            else do
+              let agendamentoDados = encontraERetornaAgendamento agendamentos (read id :: Int)
 
-            if obterAgendamentoStatusDeConcluido agendamentoDados
-              then do
-                putStrLn "Esse atendimento já foi realizado e não pode ter sua data alterada!"
-                remarcarDataDoAgendamento
-              else do
-                putStr "Nova data do atendimento: "
-                novaData <- getLine
+              if obterAgendamentoStatusDeConcluido agendamentoDados
+                then do
+                  putStrLn "Esse atendimento já foi realizado e não pode ter sua data alterada!"
+                  remarcarDataDoAgendamento
+                else do
+                  putStr "Nova data do atendimento: "
+                  novaData <- getLine
 
-                let novoAgendamento =
-                      Agendamento
-                        { agendamentoId = obterAgendamentoId agendamentoDados,
-                          animal = obterAgendamento agendamentoDados "animal",
-                          date = novaData,
-                          servicos = obterAgendamento agendamentoDados "servicos",
-                          concluido = False,
-                          emailDoDono = obterAgendamento agendamentoDados "emailDoDono"
-                        }
+                  let novoAgendamento =
+                        Agendamento
+                          { agendamentoId = obterAgendamentoId agendamentoDados,
+                            animal = obterAgendamento agendamentoDados "animal",
+                            date = novaData,
+                            servicos = obterAgendamento agendamentoDados "servicos",
+                            concluido = False,
+                            emailDoDono = obterAgendamento agendamentoDados "emailDoDono"
+                          }
 
-                removeFile "agendamentos.txt"
-                atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
-                putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
+                  removeFile "agendamentos.txt"
+                  atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
+                  putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
   menuAdm
 
 marcarServicoComoConcluido :: IO ()
@@ -418,44 +428,52 @@ marcarServicoComoConcluido = do
       putStrLn "Formato inválido! Digite um número!"
       marcarServicoComoConcluido
     else do
-      agendamentosContent <- readFile "agendamentos.txt"
-      let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
-      let hasAgendamento = encontrarAgendamento agendamentos (read id :: Int)
+      fileExists <- doesFileExist "agendamentos.txt"
+      if not fileExists then do
+        putStrLn "Não existem agendamentos até o momento."
+      else do
+        agendamentosContent <- readFile "agendamentos.txt"
+        let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
+        let hasAgendamento = encontrarAgendamento agendamentos (read id :: Int)
 
-      if not hasAgendamento
-        then do
-          putStrLn ("Agendamento com id '" ++ id ++ "' não existe!")
-          marcarServicoComoConcluido
-        else do
-          let agendamentoDados = encontraERetornaAgendamento agendamentos (read id :: Int)
+        if not hasAgendamento
+          then do
+            putStrLn ("Agendamento com id '" ++ id ++ "' não existe!")
+            marcarServicoComoConcluido
+          else do
+            let agendamentoDados = encontraERetornaAgendamento agendamentos (read id :: Int)
 
-          if obterAgendamentoStatusDeConcluido agendamentoDados
-            then do
-              putStrLn "Esse atendimento já foi marcado como concluido!"
-              marcarServicoComoConcluido
-            else do
-              let novoAgendamento =
-                    Agendamento
-                      { agendamentoId = obterAgendamentoId agendamentoDados,
-                        animal = obterAgendamento agendamentoDados "animal",
-                        date = obterAgendamento agendamentoDados "date",
-                        servicos = obterAgendamento agendamentoDados "servicos",
-                        concluido = True,
-                        emailDoDono = obterAgendamento agendamentoDados "emailDoDono"
-                      }
+            if obterAgendamentoStatusDeConcluido agendamentoDados
+              then do
+                putStrLn "Esse atendimento já foi marcado como concluido!"
+                marcarServicoComoConcluido
+              else do
+                let novoAgendamento =
+                      Agendamento
+                        { agendamentoId = obterAgendamentoId agendamentoDados,
+                          animal = obterAgendamento agendamentoDados "animal",
+                          date = obterAgendamento agendamentoDados "date",
+                          servicos = obterAgendamento agendamentoDados "servicos",
+                          concluido = True,
+                          emailDoDono = obterAgendamento agendamentoDados "emailDoDono"
+                        }
 
-              removeFile "agendamentos.txt"
-              atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
-              putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
+                removeFile "agendamentos.txt"
+                atualizarAgendamentos (novoAgendamento : [x | x <- agendamentos, obterAgendamentoId x /= (read id :: Int)])
+                putStr ("Data do agendamento '" ++ id ++ "' alterado com sucesso!")
   menuAdm
 
 listarResumoDeAtendimentos :: IO ()
 listarResumoDeAtendimentos = do
-  file <- openFile "agendamentos.txt" ReadMode
-  contents <- hGetContents file
-  let agendamentos = [read x :: Agendamento | x <- lines contents]
-  putStrLn "\nListagem de agendendamentos"
-  imprimirResumosDeAtendimento agendamentos
+  arquivoExiste <- doesFileExist "agendamentos.txt"
+  if arquivoExiste then do
+    file <- openFile "agendamentos.txt" ReadMode
+    contents <- hGetContents file
+    let agendamentos = [read x :: Agendamento | x <- lines contents]
+    putStrLn "\nListagem de agendendamentos"
+    imprimirResumosDeAtendimento agendamentos
+  else do
+    putStrLn "\nNão existem agendamentos cadastrados"
   menuAdm
 
 imprimirResumosDeAtendimento :: [Agendamento] -> IO ()
@@ -573,15 +591,21 @@ editarAnimal = do
 
 listarAgendamentosPendentes :: IO ()
 listarAgendamentosPendentes = do
-  file <- openFile "agendamentos.txt" ReadMode
-  contents <- hGetContents file
+   
+   fileExists <- doesFileExist "agendamentos.txt"
+   if not fileExists then do
+     putStr "Ainda não existem agendamentos realizados"
+     menuAdm
+   else do
+    file <- openFile "agendamentos.txt" ReadMode
+    contents <- hGetContents file
 
-  let agendamentosStr = lines contents
-  let agendamentos = map converterEmAgendamento agendamentosStr
+    let agendamentosStr = lines contents
+    let agendamentos = map converterEmAgendamento agendamentosStr
 
-  putStrLn "\nListagem de agendamentos pendentes:"
-  mostrarAgendamentosPendentes agendamentos
-  menuAdm
+    putStrLn "\nListagem de agendamentos pendentes:"
+    mostrarAgendamentosPendentes agendamentos
+    menuAdm
 
 mostrarAgendamentosPendentes :: [Agendamento] -> IO ()
 mostrarAgendamentosPendentes [] = do
@@ -604,15 +628,19 @@ mostrarAgendamentosPendentes (a : as) = do
 
 agendamentosConcluidos :: Bool -> String -> IO ()
 agendamentosConcluidos status email = do
-  file <- openFile "agendamentos.txt" ReadMode
-  contents <- hGetContents file
+  fileExists <- doesFileExist "agendamentos.txt"
+  if not fileExists then do
+    putStrLn "Não existem agendamentos efetuados até o momento"
+  else do
+    file <- openFile "agendamentos.txt" ReadMode
+    contents <- hGetContents file
 
-  let agendamentosStr = lines contents
-  let agendamentos = map converterEmAgendamento agendamentosStr
+    let agendamentosStr = lines contents
+    let agendamentos = map converterEmAgendamento agendamentosStr
 
-  printLine
-  putStrLn "\nListagem de agendamentos:"
-  mostrarAgendamentosDoCliente agendamentos email status
+    printLine
+    putStrLn "\nListagem de agendamentos:"
+    mostrarAgendamentosDoCliente agendamentos email status
   segundoMenuCliente email
 
 mostrarAgendamentosDoCliente :: [Agendamento] -> String -> Bool -> IO ()
@@ -683,18 +711,29 @@ agendarAgendamento email servico = do
         then do
           putStrLn ("\nAnimal com o nome: '" ++ nome ++ "' não cadastrado!")
         else do
-          agendamentosContent <- readFile "agendamentos.txt"
-          let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
-          let agendamentoId = makeAgendamentoId agendamentos
+          
+          fileExists <- doesFileExist "agendamentos.txt"
+          
+          if not fileExists then do
+            
+            let agendamento = Agendamento {agendamentoId = 0, animal = nome, date = dataAtendimento, servicos = servico, concluido = False, emailDoDono = email}
+            
+            atualizarAgendamentos [agendamento]
+            putStrLn "Agendamento cadastrado com sucesso!"
 
-          let agendamento = Agendamento {agendamentoId = agendamentoId, animal = nome, date = dataAtendimento, servicos = servico, concluido = False, emailDoDono = email}
+          else do
+            agendamentosContent <- readFile "agendamentos.txt"
+            let agendamentos = [read x :: Agendamento | x <- lines agendamentosContent]
+            let agendamentoId = makeAgendamentoId agendamentos
 
-          let antigaListaDeAgendamentos = agendamentos
-          let novaListaDeAgendamentos = antigaListaDeAgendamentos ++ [agendamento]
+            let agendamento = Agendamento {agendamentoId = agendamentoId, animal = nome, date = dataAtendimento, servicos = servico, concluido = False, emailDoDono = email}
 
-          removeFile "agendamentos.txt"
-          atualizarAgendamentos novaListaDeAgendamentos
-          putStrLn "Agendamento cadastrado com sucesso!"
+            let antigaListaDeAgendamentos = agendamentos
+            let novaListaDeAgendamentos = antigaListaDeAgendamentos ++ [agendamento]
+
+            removeFile "agendamentos.txt"
+            atualizarAgendamentos novaListaDeAgendamentos
+            putStrLn "Agendamento cadastrado com sucesso!"
   segundoMenuCliente email
 
 cadastrarComoCliente :: IO ()
@@ -747,6 +786,7 @@ criarCliente nome email senha telefone = do
 
 logarComoCliente :: IO ()
 logarComoCliente = do
+  printLine
   putStr "Insira seu email: "
   email <- getLine
   fileExists <- doesFileExist "clientes.txt"
@@ -762,10 +802,10 @@ logarComoCliente = do
 
       if hasCliente
         then do
-          putStrLn "Login realizado com sucesso"
+          putStrLn "\nLogin realizado com sucesso"
           segundoMenuCliente email
         else do
-          putStrLn "Nome ou senha incorretos"
+          putStrLn "\nNome ou senha incorretos"
           menuCliente
       hClose file
     else do
@@ -779,32 +819,38 @@ agendaHotelzinho email = do
   let disponibilidade = read disponibilidadeContent :: DisponibilidadeHotelzinho
   if obterDisponibilidade disponibilidade
     then do
-      putStrLn "Aqui estão os seus animais:\n"
-      listarAnimais email
+      
+      fileExists <- doesFileExist "animais.txt"
+      if not fileExists then do
+        putStrLn "\nNão existem animais à serem agendados para o hotelzinho"
+        segundoMenuCliente email
+      else do
+        putStrLn "Aqui estão os seus animais:\n"
+        listarAnimais email
 
-      putStrLn "----------------------------------------------------------------"
-      putStrLn "Insira o nome do animal que você deseja hospedar no hotelzinho: "
+        putStrLn "----------------------------------------------------------------"
+        putStrLn "Insira o nome do animal que você deseja hospedar no hotelzinho: "
 
-      nomeDoAnimal <- getLine
-      animaisContent <- readFile "animais.txt"
+        nomeDoAnimal <- getLine
+        animaisContent <- readFile "animais.txt"
 
-      let animais = lines animaisContent
-      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeDoAnimal email
+        let animais = lines animaisContent
+        let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeDoAnimal email
 
-      if not hasAnimal
-        then do
-          putStrLn "\nAVISO!"
-          putStrLn ("O cliente '" ++ email ++ "' não possui o animal '" ++ nomeDoAnimal ++ "' cadastrado!\n")
-          putStrLn "Retornando ao menu principal...\n"
-          segundoMenuCliente email
-        else do
-          putStr "Até que dia você deseja fazer a reserva do hotelzinho pet? inserir em formato DIA/MES/ANO: "
-          periodo <- getLine
+        if not hasAnimal
+          then do
+            putStrLn "\nAVISO!"
+            putStrLn ("O cliente '" ++ email ++ "' não possui o animal '" ++ nomeDoAnimal ++ "' cadastrado!\n")
+            putStrLn "Retornando ao menu principal...\n"
+            segundoMenuCliente email
+          else do
+            putStr "Até que dia você deseja fazer a reserva do hotelzinho pet? inserir em formato DIA/MES/ANO: "
+            periodo <- getLine
 
-          animaisContents <- readFile "animais.txt"
-          let animais = lines animaisContents
+            animaisContents <- readFile "animais.txt"
+            let animais = lines animaisContents
 
-          agendarAnimalNoHotelzinho (encontraERetornaAnimal [read x :: Animal | x <- animais] nomeDoAnimal email) email periodo
+            agendarAnimalNoHotelzinho (encontraERetornaAnimal [read x :: Animal | x <- animais] nomeDoAnimal email) email periodo
     else do
       putStrLn "Infelizmente o serviço de hotelzinho não está disponível no momento. Tente novamente mais tarde!"
       segundoMenuCliente email
@@ -888,10 +934,16 @@ removerAgendamentosDeUmCliente emailDoCliente = do
 
 cancelarAgendamento :: String -> IO ()
 cancelarAgendamento emailCliente = do
-  file <- openFile "agendamentos.txt" ReadMode
-  contents <- hGetContents file
-  putStrLn "Escolha um agendamento para cancelar: \n"
-  escolherAgendamento [read a :: Agendamento | a <- lines contents, obterAgendamento (read a :: Agendamento) "emailDoDono" == emailCliente] emailCliente
+  
+  fileExists <- doesFileExist "agendamentos.txt"
+  if not fileExists then do
+    putStrLn "Não existem agendamentos à serem cancelados."
+    segundoMenuCliente emailCliente
+  else do
+    file <- openFile "agendamentos.txt" ReadMode
+    contents <- hGetContents file
+    putStrLn "Escolha um agendamento para cancelar: \n"
+    escolherAgendamento [read a :: Agendamento | a <- lines contents, obterAgendamento (read a :: Agendamento) "emailDoDono" == emailCliente] emailCliente
 
 escolherAgendamento :: [Agendamento] -> String -> IO ()
 escolherAgendamento [] emailCliente = do
@@ -968,13 +1020,19 @@ converterEmAnimal a = read a :: Animal
 
 listarAnimais :: String -> IO ()
 listarAnimais emailCliente = do
-  file <- openFile "animais.txt" ReadMode
-  contents <- hGetContents file
+  arquivoExiste <- doesFileExist "animais.txt"
+  if arquivoExiste then do
+    file <- openFile "animais.txt" ReadMode
+    contents <- hGetContents file
 
-  let animaisStr = lines contents
-  let animais = map converterEmAnimal animaisStr
+    let animaisStr = lines contents
+    let animais = map converterEmAnimal animaisStr
 
-  mostrarAnimaisDoCliente emailCliente animais
+    mostrarAnimaisDoCliente emailCliente animais
+  else do 
+    putStrLn " não existem animais cadastrados até o momento"
+    segundoMenuCliente emailCliente
+  
 
 mostrarAnimaisDoCliente :: String -> [Animal] -> IO ()
 mostrarAnimaisDoCliente emailCliente [] = do
@@ -1079,24 +1137,28 @@ obterDisponibilidade DisponibilidadeHotelzinho {disponibilidade = d} = d
 
 verificaSeAnimalEClienteExistem :: String -> String -> IO ()
 verificaSeAnimalEClienteExistem nomeAnimal emailCliente = do
-  clientesContent <- readFile "clientes.txt"
-  let clientes = lines clientesContent
-  let hasCliente = encontraCliente [read x :: Cliente | x <- clientes] emailCliente ""
-  if not hasCliente
-    then do
-      putStrLn ("O cliente '" ++ emailCliente ++ "' não existe. Verifique se o email foi digitado corretamente!")
-      menuAdm
-    else do
-      animaisContent <- readFile "animais.txt"
-      let animais = lines animaisContent
+  arquivoExiste <- doesFileExist "animais.txt"
+  if not arquivoExiste then do
+    putStrLn "\nNão existe animal associado à este cliente."
+  else do
+    clientesContent <- readFile "clientes.txt"
+    let clientes = lines clientesContent
+    let hasCliente = encontraCliente [read x :: Cliente | x <- clientes] emailCliente ""
+    if not hasCliente
+      then do
+        putStrLn ("O cliente '" ++ emailCliente ++ "' não existe. Verifique se o email foi digitado corretamente!")
+        menuAdm
+      else do
+        animaisContent <- readFile "animais.txt"
+        let animais = lines animaisContent
 
-      let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeAnimal emailCliente
+        let hasAnimal = encontraAnimal [read x :: Animal | x <- animais] nomeAnimal emailCliente
 
-      if not hasAnimal
-        then do
-          putStrLn ("O cliente '" ++ emailCliente ++ "' não possui o animal '" ++ nomeAnimal ++ "' cadastrado!")
-          menuAdm
-        else putStr ""
+        if not hasAnimal
+          then do
+            putStrLn ("O cliente '" ++ emailCliente ++ "' não possui o animal '" ++ nomeAnimal ++ "' cadastrado!")
+            menuAdm
+          else putStr ""
 
 encontrarAnimalASerRemovido :: Animal -> String -> String -> Bool
 encontrarAnimalASerRemovido animal nomeDoAnimal emailDoDono = do
