@@ -584,8 +584,7 @@ editarAnimal = do
             especie = obterAnimal dadosAntigosDoAnimal "especie",
             idade = novaIdade
           }
-  atualizaAnimais novaListaDeAnimais
-  appendFile "animais.txt" ("\n" ++ show animalEditado)
+  atualizaAnimais (novaListaDeAnimais ++ [animalEditado])
 
   menuAdm
 
@@ -1077,7 +1076,7 @@ verificaSeJaExisteUmAnimalCadastrado :: String -> String -> IO ()
 verificaSeJaExisteUmAnimalCadastrado nome email = do
   fileExist <- doesFileExist "animais.txt"
 
-  if not fileExist then do
+  if fileExist then do
     animaisFile <- openFile "animais.txt" ReadMode
     animaisContent <- hGetContents animaisFile
     let animais = lines animaisContent
