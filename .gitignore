@@ -1,2 +1,8 @@
 *.hi
 *.o
+*.exe
+clientes.txt
+hospedagem.txt
+hotelzinho.txt
+agendamentos.txt
+animais.txt
