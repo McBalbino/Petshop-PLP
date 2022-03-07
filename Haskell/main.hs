@@ -74,7 +74,7 @@ printLine = putStrLn "\n------------------------------------------"
 main :: IO ()
 main = do
   printLine
-  putStr "Boas vindas!"
+  putStr "Boas vindas! PET SHOP FUNCIONAL"
   showMenu
 
 showMenu :: IO ()
