@@ -49,7 +49,7 @@ login_cliente(Email) :-
 adicionaAnimal :-
 	setup_bd_animal,
 	tell('./data/bd_animais.pl'), nl,
-	listing(animal/5),
+	listing(animal/6),
 	told.
 
 cadastraAnimal(Email) :-
@@ -62,6 +62,8 @@ cadastraAnimal(Email) :-
 	read_line_to_string(user_input, Peso),
 	nl, writeln("Insira a altura do animal: "),
 	read_line_to_string(user_input, Altura),
-	assertz(animal(Nome, Email, Especie, Peso, Altura)),
+	nl, writeln("Insira a idade do animal: "),
+	read_line_to_string(user_input, Idade),
+	assertz(animal(Nome, Email, Especie, Peso, Altura, Idade)),
 	adicionaAnimal,
 	writeln("Animal cadastrado com sucesso!").

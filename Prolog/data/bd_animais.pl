@@ -1,5 +1,5 @@
 
-:- dynamic animal/5.
+:- dynamic animal/6.
 
-animal("george", "maria@teste.com", "gato", "1", "21").
+animal("rex", "maria@teste.com", "cachorro", "12", "5", "2").
 
