@@ -23,9 +23,11 @@ mostraMenu :-
 menuAdm :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Ver usuarios cadastrados no sistema"),
+	writeln("2 - Remover usuários"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> listaClientes, menuAdm;
+	Option == "2" -> remove_cliente, menuAdm;
 	Option == "0" -> mostraMenu;
 	opcaoInvalida,
 	menuAdm).
