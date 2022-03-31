@@ -23,9 +23,13 @@ cadastraCliente :-
 	read_line_to_string(user_input, Senha),
 	nl, writeln("Insira seu telefone: "),
 	read_line_to_string(user_input, Telefone),
+	(get_emails_clientes(Emails), member(Email, Emails) -> nl, writeln("Email já cadastrado.");
 	assertz(cliente(Nome, Email, Senha, Telefone)),
 	adicionaCliente,
-	writeln("Cliente cadastrado com sucesso!"),nl.
+	writeln("Cliente cadastrado com sucesso!"),nl).
+
+get_emails_clientes(Emails) :- 
+	findall(Email, cliente(_,Email,_,_), Emails).
 
 loginCliente(Email) :-
 	nl,
