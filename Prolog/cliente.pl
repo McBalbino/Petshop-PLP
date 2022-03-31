@@ -1,7 +1,3 @@
-:- module('cliente', [cadastraCliente/0]).
-:- use_module(library(apply)).
-:- use_module(library(csv)).
-
 setup_bd :-
 	consult('./data/bd_clientes.pl').
 
@@ -67,3 +63,4 @@ cadastraAnimal(Email) :-
 	assertz(animal(Nome, Email, Especie, Peso, Altura, Idade)),
 	adicionaAnimal,
 	writeln("Animal cadastrado com sucesso!").
+

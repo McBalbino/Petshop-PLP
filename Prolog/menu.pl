@@ -1,4 +1,5 @@
-:- use_module("cliente").
+:- include('./cliente.pl').
+:- include('./adm.pl').
 
 main :- 
 	apresentacao, 
@@ -13,10 +14,21 @@ mostraMenu :-
 	writeln("2 - Sou Cliente"),
 	writeln("3 - Encerrar programa"),
 	read_line_to_string(user_input, Option),
-	(Option == "2" -> menuCliente;
+	(Option == "1" -> login_adm -> menuAdm;
+	Option == "2" -> menuCliente;
 	Option == "3" -> sair;
 	opcaoInvalida,
 	mostraMenu, nl, halt).
+
+menuAdm :-
+	writeln("Selecione uma das opções abaixo:"),
+	writeln("1 - Ver usuarios cadastrados no sistema"),
+	writeln("0 - Retornar ao menu principal"),
+	read_line_to_string(user_input, Option),
+	(Option == "1" -> listaClientes, menuAdm;
+	Option == "0" -> mostraMenu;
+	opcaoInvalida,
+	menuAdm).
 
 menuCliente :-
 	writeln("Selecione uma das opções abaixo:"),
@@ -24,8 +36,8 @@ menuCliente :-
 	writeln("2 - Logar no sistema como cliente"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
-	(Option == "1" -> cliente:cadastraCliente, menuCliente;
-	Option == "2" -> (cliente:login_cliente(Email) -> segundoMenuCliente(Email) ; mostraMenu);
+	(Option == "1" -> cadastraCliente, menuCliente;
+	Option == "2" -> (login_cliente(Email) -> segundoMenuCliente(Email) ; mostraMenu);
 	Option == "0" -> mostraMenu;
 	opcaoInvalida,
 	menuCliente).
@@ -35,7 +47,7 @@ segundoMenuCliente(Email) :-
 	writeln("1 - Cadastrar um animal"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
-	(Option == "1" -> (cliente:cadastraAnimal(Email), segundoMenuCliente(Email));
+	(Option == "1" -> (cadastraAnimal(Email), segundoMenuCliente(Email));
 	Option == "0" -> mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
