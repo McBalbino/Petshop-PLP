@@ -52,32 +52,6 @@ segundoMenuCliente(Email) :-
 	opcaoInvalida,
 	segundoMenuCliente).
 
-menuAdm :-
-	writeln("\nSelecione uma das opções abaixo"),
-	writeln("1 - Ver usuários cadastrados no sistema"),
-	writeln("2 - Remover usuários"),
-	writeln("3 - Alterar disponibilidade hotelzinho"),
-	writeln("4 - listar resumo de agendamentos"),
-	writeln("5 - Atualizar contato Adm"),
-	writeln("6 - Editar dados de um animal"),
-	writeln("7 - Remarcar data de um agendamento"),
-	writeln("8 - Ver serviços agendados pendentes"),
-	writeln("9 - Marcar um servico como concluido"),
-	writeln("0 - Voltar"),
-	read_line_to_string(user_input, Option),
-	(Option == "1" -> adm:verClientesCadastrados;
-	Option == "2" -> adm:removerCliente;
-	Option == "3" -> adm:alterarDisponibilidadeHotelzinho;
-	Option == "4" -> adm:listarResumoDeAtendimentos;
-	Option == "5" -> adm:atualizarContatoAdm;
-	Option == "6" -> adm:editarAnimal;
-	Option == "7" -> adm:remarcarDataDoAgendamento;
-	Option == "8" -> adm:listarAgendamentosPendentes;
-	Option == "9" -> adm:marcarServicoComoConcluido;
-	Option == "0" -> mostraMenu;
-	opcaoInvalida, menuAdm).
-
-
 sair :- halt.
 
 opcaoInvalida :-
