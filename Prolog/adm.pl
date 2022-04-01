@@ -73,7 +73,8 @@ remove_cliente :-
     add_clientes(C_att),
     tell('./data/bd_clientes.pl'), nl,
     listing(cliente/4),
-    told, nl.
+    told, nl,
+    fimMetodoAdm.
 
 remove_cliente_aux([],_,[]) :-
 	nl,
@@ -91,6 +92,9 @@ add_animal(Nome, Email, Especie, Peso, Altura, Idade) :-
 list_animais(A) :- 
 	findall([Nome, Email, Especie, Peso, Altura, Idade], animal(Nome, Email, Especie, Peso, Altura, Idade), A).
 
+fimMetodoAdm:-
+	writeln("Clique em enter para continuar: "),
+	read_line_to_string(user_input, _).
 
 remove_animal(Email) :- 
     list_animais(A), 

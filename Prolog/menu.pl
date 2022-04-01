@@ -41,7 +41,7 @@ menuAdm :-
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, listaClientes, tty_clear, menuAdm;
-	Option == "2" -> tty_clear, remove_cliente, menuAdm;
+	Option == "2" -> tty_clear, remove_cliente, tty_clear, menuAdm;
 	Option == "3" -> tty_clear, editar_dados_animal, tty_clear, menuAdm;
 	Option == "4" -> tty_clear, alterar_configuracao_hotelzinho, menuAdm;
 	Option == "5" -> tty_clear, editar_contato_administrador, menuAdm;
