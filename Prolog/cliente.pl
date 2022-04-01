@@ -13,6 +13,8 @@ adicionaCliente :-
 	listing(cliente/4),
 	told.
 
+
+
 cadastraCliente :-
 	setup_bd,
 	nl, writeln("Insira seu nome: "),
@@ -27,7 +29,8 @@ cadastraCliente :-
 	(get_emails_clientes(Emails), member(Email, Emails) -> nl, writeln("Email já cadastrado."), nl;
 	assertz(cliente(Nome, Email, Senha, Telefone)),
 	adicionaCliente,
-	writeln("Cliente cadastrado com sucesso!"),nl).
+	writeln("Cliente cadastrado com sucesso!"),nl),
+	fimMetodo.
 
 get_emails_clientes(Emails) :- 
 	findall(Email, cliente(_,Email,_,_), Emails).
@@ -45,7 +48,12 @@ login_cliente(Email) :-
 	setup_bd,
 	arquivo_vazio -> writeln("Cliente não cadastrado."), nl, false;
 	(cliente(_, _, _, _) -> loginCliente(Email);
-	writeln("Cliente não cadastrado."), nl, false).
+	writeln("Cliente não cadastrado."), nl, false),
+	fimMetodo.
+
+fimMetodo:-
+	writeln("Clique em enter para continuar: "),
+	read_line_to_string(user_input, _).
 
 adicionaAnimal :-
 	setup_bd_animal,
