@@ -79,7 +79,7 @@ segundoMenuCliente(Email) :-
 	(Option == "3" -> (tty_clear, menuServico(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "4" -> (tty_clear, listarServicosPendentesDoCliente(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "5" -> (tty_clear, listarServicosConcluidosDoCliente(Email), tty_clear, segundoMenuCliente(Email)));
-	(Option == "5" -> (tty_clear, removeAnimal(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "6" -> (tty_clear, removeAnimal(Email), tty_clear, segundoMenuCliente(Email)));
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
