@@ -7,4 +7,5 @@ servico("Charles", "other", "06/09/1999", "Banho e tosa", "Pendente").
 servico("Dig", "maria@teste.com", "120901", "Consulta veterinária", "Pendente").
 servico("Dig", "maria@teste.com", "18291821", "Consulta veterinária", "Pendente").
 servico("Bob", "maria@teste.com", "0201021", "Banho e tosa", "Pendente").
+servico("bruno", "marcos", "21/03/2023", "Consulta veterinária", "Pendente").
 
