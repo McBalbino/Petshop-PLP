@@ -111,4 +111,19 @@ fimListagem:-
 	writeln("Clique em enter para continuar: "),
 	read_line_to_string(user_input, _).
 
+editarDataServico :- 
+	setup_bd_servico,
+	writeln("Informe o id do serviço a ser remarcado: "),
+	read_line_to_string(user_input, IdStr),
+	number_codes(Id, IdStr),
+	((servico(Id,_,_,_,_,"Concluido") -> nl, writeln("Servico não pode ser remarcado, pois já foi concluido!");
 
+	writeln("Informe a nova data do agendamento: "),
+	read_line_to_string(user_input, NovaData),
+	retract(servico(Id, NomeAnimal, Email, _, Servico, Status)),
+	assertz(servico(Id, NomeAnimal, Email, NovaData, Servico, Status)),
+	tell('./data/bd_servicos.pl'),
+	listing(servico/6),
+	told);
+	writeln("Servico não cadastrado"), nl),
+	fimMetodoServico.

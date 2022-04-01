@@ -39,6 +39,7 @@ menuAdm :-
 	writeln("5 - Atualizar contato do administrador"),
 	writeln("6 - Ver serviços agendados pendentes"),
 	writeln("7 - Marcar servico como concluido"),
+	writeln("8 - Remarcar serviço"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, listaClientes, tty_clear, menuAdm;
@@ -48,6 +49,7 @@ menuAdm :-
 	Option == "5" -> tty_clear, editar_contato_administrador, menuAdm;
 	Option == "6" -> tty_clear, listarServicosPendentes, tty_clear, menuAdm;
 	Option == "7" -> tty_clear, marcarServicoConcluido, tty_clear, menuAdm;
+	Option == "8" -> tty_clear, editarDataServico, tty_clear, menuAdm;
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	menuAdm).
