@@ -26,7 +26,7 @@ mostraMenu :-
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, login_adm -> tty_clear, menuAdm;
 	Option == "2" -> tty_clear, menuCliente;
-	Option == "3" -> sair;
+	Option == "3" -> tty_clear, sair;
 	opcaoInvalida,
 	mostraMenu, nl, halt).
 
@@ -34,12 +34,18 @@ menuAdm :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Ver usuarios cadastrados no sistema"),
 	writeln("2 - Remover usuários"),
-	writeln("3 - Ver serviços agendados pendentes"),
+	writeln("3 - Editar dados de um animal"),
+	writeln("4 - Alterar disponibilidade do hotelzinho"),
+	writeln("5 - Atualizar contato do administrador"),
+	writeln("6 - Ver serviços agendados pendentes"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, listaClientes, menuAdm;
 	Option == "2" -> tty_clear, remove_cliente, tty_clear, menuAdm;
-	Option == "3" -> tty_clear, listarServicosPendentes, tty_clear, menuAdm;
+	Option == "3" -> tty_clear, editar_dados_animal, tty_clear, menuAdm;
+	Option == "4" -> tty_clear, alterar_configuracao_hotelzinho, menuAdm;
+	Option == "5" -> tty_clear, editar_contato_administrador, menuAdm;
+	Option == "6" -> tty_clear, listarServicosPendentes, tty_clear, menuAdm;
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	menuAdm).
@@ -48,10 +54,12 @@ menuCliente :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Se cadastrar como cliente"),
 	writeln("2 - Logar no sistema como cliente"),
+	writeln("3 - Ver contato do administrador"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, cadastraCliente, tty_clear, menuCliente;
 	Option == "2" -> (tty_clear, login_cliente(Email) -> tty_clear, segundoMenuCliente(Email) ; tty_clear, mostraMenu);
+	Option == "3" -> (tty_clear, exibir_contato_admin, tty_clear, menuCliente);
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	menuCliente).
@@ -62,15 +70,25 @@ segundoMenuCliente(Email) :-
 	writeln("2 - Listar meus animais"),
 	writeln("3 - Agendar um serviço"),
 	writeln("4 - Listar agendamentos"),
+	writeln("5 - Remover um animal"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> (tty_clear, cadastraAnimal(Email), tty_clear, segundoMenuCliente(Email));
-		(Option == "2" -> (tty_clear, listarAnimais(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "2" -> (tty_clear, listarAnimais(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "3" -> (tty_clear, menuServico(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "4" -> (tty_clear, listarServicos(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "5" -> (tty_clear, removeAnimal(Email), tty_clear, segundoMenuCliente(Email)));
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
+
+exibir_contato_admin:- nl,
+	consult('./data/bd_adm.pl'),
+	administrador("adm",_,Contato),
+	writeln(Contato),
+
+	writeln("pressione qualquer tecla para voltar ao menu"),
+	read_line_to_string(user_input, Option).
 
 sair :- halt.
 

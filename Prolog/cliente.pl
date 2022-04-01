@@ -88,7 +88,7 @@ exibirAnimais([], []):-
 exibirAnimais([N], [A]):-
 	write("Nome do animal: "),
 	writeln(N),
-	write("Serviços: "),
+	write("Espécie: "),
 	writeln(A), 
 	nl,
 	fimListagemAnimal.
@@ -104,3 +104,39 @@ exibirAnimais([N|TN], [A|TA]):-
 fimListagemAnimal:-
 	writeln("Clique em enter para continuar: "),
 	read_line_to_string(user_input, Input).
+
+listAnimais(A) :- 
+	findall([Nome, Email, Especie, Peso, Altura, Idade], animal(Nome, Email, Especie, Peso, Altura, Idade), A).
+
+removeAnimalAux([],_,_,[]) :-
+	nl,
+	writeln("Animal inexistente").
+removeAnimalAux([H|T], Nome, Email, Out) :- 
+	member(Nome, H), 
+	member(Email, H),
+	removeAnimalAux(T, Nome, Email, Out), 
+	writeln("Animal removido com sucesso!").
+removeAnimalAux([H|T], Nome, Email, [H|Out]) :- removeAnimalAux(T, Nome, Email, Out).
+
+addAnimal(Nome, Email, Especie, Peso, Altura, Idade) :- 
+	assertz(animal(Nome, Email, Especie, Peso, Altura, Idade)).
+
+addAnimais([]).
+addAnimais([[Nome, Email, Especie, Peso, Altura, Idade]|T]) :-
+	addAnimal(Nome, Email, Especie, Peso, Altura, Idade), addAnimais(T).
+
+removeAnimalAux(Nome, Email) :- 
+	listAnimais(A), 
+	retractall(animal(_,_,_,_,_,_)),
+	removeAnimalAux(A, Nome, Email, C_att),
+	addAnimais(C_att),
+	tell('./data/bd_animais.pl'), nl,
+	listing(animal/6),
+	told.
+
+removeAnimal(Email) :-
+	nl,
+	writeln("Insira nome do animal a ser removido: "),
+	read_line_to_string(user_input, Nome),
+	removeAnimalAux(Nome, Email).
+	

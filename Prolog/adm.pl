@@ -1,11 +1,16 @@
 :- consult('./data/bd_clientes.pl').
 :- consult('./data/bd_animais.pl').
+:- consult('./data/bd_configuracao_hotelzinho.pl').
+
 
 setup_bd_cliente :-
 	consult('./data/bd_clientes.pl').
 
 setup_bd_login :-
 	consult('./data/bd_adm.pl').
+
+setup_bd_configuracao_hotelzinho :-
+	consult('./data/bd_configuracao_hotelzinho.pl').
 
 arquivo_vazio_adm :-
 	\+(predicate_property(administrador(_,_,_), dynamic)).
@@ -94,3 +99,109 @@ remove_animal(Email) :-
 remove_animal_aux([],_,[]).
 remove_animal_aux([H|T], Email, Out) :- member(Email, H), remove_animal_aux(T, Email, Out).
 remove_animal_aux([H|T], Email, [H|Out]) :- remove_animal_aux(T, Email, Out).
+
+
+adicionaAnimalComNovosDados :-
+	setup_bd_animal,
+	tell('./data/bd_animais.pl'), nl,
+	listing(animal/6),
+	told.
+
+atualizaAnimal([Nome|[EmailDoDono|[Especie|_]]], Peso, Altura, Idade) :-
+	assertz(animal(Nome, EmailDoDono, Especie, Peso, Altura, Idade)),
+	adicionaAnimalComNovosDados,
+	writeln("Dados do animal atualizados com sucesso!").
+
+pega_novos_dados_animal(Peso, Altura, Idade) :-
+	nl,
+	writeln("Insira o novo peso do animal: "),
+	read_line_to_string(user_input, Peso),
+
+	writeln("Insira a nova altura do animal: "),
+	read_line_to_string(user_input, Altura),
+
+	writeln("Insira a nova idade do animal: "),
+	read_line_to_string(user_input, Idade).
+
+edita_dados_animal_aux([],_,_,[]).
+edita_dados_animal_aux([H|T], Nome, Email, Out) :- 
+	member(Nome, H), 
+	member(Email, H),
+	edita_dados_animal_aux(T, Nome, Email, Out), 
+	pega_novos_dados_animal(Peso, Altura, Idade),
+	removeAnimalAux(Nome, Email),
+	atualizaAnimal(H, Peso, Altura, Idade).
+edita_dados_animal_aux([H|T], Nome, Email, [H|Out]) :- edita_dados_animal_aux(T, Nome, Email, Out).
+
+editar_dados_animal_aux(Nome, Email) :-
+	list_animais(A),
+	retractall(animal(_,_,_,_,_,_)),
+	edita_dados_animal_aux(A, Nome, Email, C_att),
+	add_animais(C_att),
+	tell('./data/bd_animais.pl'), nl,
+	listing(animal/6),
+	told.
+	
+editar_dados_animal :-nl,
+	writeln("Insira o nome do animal a ser atualizado: "),
+	read_line_to_string(user_input, Nome),
+	writeln("Insira o email do dono do animal: "),
+	read_line_to_string(user_input, Email),
+	editar_dados_animal_aux(Nome, Email).
+
+alterar_configuracao_hotelzinho :-nl,
+	writeln("Alterando a disponibilidade do hotelzinho..."),
+	exibe_configuracao_hotelzinho, 
+	writeln("--------------------------------------------"), 
+	writeln("1 - Tornar o hotelzinho disponível"),
+	writeln("2 - Tornar o hotelzinho indisponível"),
+	writeln("3 - Voltar ao menu"),
+	read_line_to_string(user_input, Option),
+	(Option == "1" -> ativa_desativa_hotelzinho("disponivel");
+	 Option == "2" -> ativa_desativa_hotelzinho("indisponivel");
+	 Option == "3" -> tty_clear, menuAdm;
+	 opcaoInvalida, alterar_configuracao_hotelzinho).
+
+ativa_desativa_hotelzinho(Status) :-
+	setup_bd_configuracao_hotelzinho,
+	retract(configuracao_hotelzinho("status", _)),
+	assert(configuracao_hotelzinho("status", Status)),
+	tell('./data/bd_configuracao_hotelzinho.pl'), nl,
+	listing(configuracao_hotelzinho/2),
+	told,
+	tty_clear,nl,
+	writeln("Configuração de hotelzinho atualizada com sucesso"),
+	writeln("Aperte qualquer tecla para voltar ao menu."),
+	read_line_to_string(user_input, Option),
+	tty_clear.
+	
+exibe_configuracao_hotelzinho :-nl,
+	setup_bd_configuracao_hotelzinho,
+	(configuracao_hotelzinho(_,"disponivel"),
+	writeln("O hotelzinho encontra-se disponível");
+	configuracao_hotelzinho(_,"indisponivel"),
+	writeln("O hotelzinho encontra-se indisponível")).
+
+editar_contato_administrador :-
+	setup_bd_login,
+	writeln("Confirme o email do adm"),
+	read_line_to_string(user_input, Email),
+	writeln("Confirme a senha do adm"),
+	read_line_to_string(user_input, Senha),
+
+	(administrador(Email, Senha, _) -> nl, 
+		writeln("insira o número do contato a ser atualizado."),
+		read_line_to_string(user_input, Contato), nl, 
+		retract(administrador(Email, Senha, _)),
+		assert(administrador(Email,Senha,Contato)),	
+		tell('./data/bd_adm.pl'), nl,
+		listing(administrador/3),
+		told, 
+		tty_clear,
+		writeln("Contato atualizado com sucesso."),
+		writeln("Pressione qualquer tecla para retornar ao menu."),
+		read_line_to_string(user_input, Option),
+		tty_clear;
+	writeln("Senha incorreta."), nl, false).
+	
+
