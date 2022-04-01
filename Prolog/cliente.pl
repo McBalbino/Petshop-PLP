@@ -73,3 +73,34 @@ cadastraAnimal(Email) :-
 
 get_nome_animal(A) :- 
 	findall([Nome,Email], animal(Nome,Email,_,_,_,_), A).
+
+listarAnimais(Email):-
+	setup_bd_servico,
+	findall(NomeAnimal, animal(NomeAnimal, Email, _, _, _,_), ListaNomes),
+	findall(Animal, animal(_, Email, Animal, _, _, _), ListaAnimais),
+	exibirAnimais(ListaNomes, ListaAnimais).
+
+exibirAnimais([], []):-
+	writeln("Nenhum animal cadastrado."), 
+	nl,
+	fimListagemAnimal.
+
+exibirAnimais([N], [A]):-
+	write("Nome do animal: "),
+	writeln(N),
+	write("Serviços: "),
+	writeln(A), 
+	nl,
+	fimListagemAnimal.
+
+exibirAnimais([N|TN], [A|TA]):-
+	write("Nome do animal: "),
+	writeln(N),
+	write("Espécie: "),
+	writeln(A),
+	nl,
+	exibirAnimais(TN, TA).
+
+fimListagemAnimal:-
+	writeln("Clique em enter para continuar: "),
+	read_line_to_string(user_input, Input).

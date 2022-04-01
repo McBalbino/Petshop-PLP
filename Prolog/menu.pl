@@ -1,5 +1,6 @@
 :- include('./cliente.pl').
 :- include('./adm.pl').
+:- include('./servico.pl').
 
 letreiro :-
 	writeln("Bem-vindo ao sistema do "), nl,
@@ -33,10 +34,12 @@ menuAdm :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Ver usuarios cadastrados no sistema"),
 	writeln("2 - Remover usuários"),
+	writeln("3 - Ver serviços agendados pendentes"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, listaClientes, menuAdm;
 	Option == "2" -> tty_clear, remove_cliente, tty_clear, menuAdm;
+	Option == "3" -> tty_clear, listarServicosPendentes, tty_clear, menuAdm;
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	menuAdm).
@@ -56,9 +59,15 @@ menuCliente :-
 segundoMenuCliente(Email) :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Cadastrar um animal"),
+	writeln("2 - Listar meus animais"),
+	writeln("3 - Agendar um serviço"),
+	writeln("4 - Listar agendamentos"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> (tty_clear, cadastraAnimal(Email), tty_clear, segundoMenuCliente(Email));
+		(Option == "2" -> (tty_clear, listarAnimais(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "3" -> (tty_clear, menuServico(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "4" -> (tty_clear, listarServicos(Email), tty_clear, segundoMenuCliente(Email)));
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
