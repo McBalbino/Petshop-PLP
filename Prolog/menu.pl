@@ -25,7 +25,7 @@ mostraMenu :-
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, login_adm -> tty_clear, menuAdm;
 	Option == "2" -> tty_clear, menuCliente;
-	Option == "3" -> sair;
+	Option == "3" -> tty_clear, sair;
 	opcaoInvalida,
 	mostraMenu, nl, halt).
 
@@ -61,7 +61,6 @@ segundoMenuCliente(Email) :-
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> (tty_clear, cadastraAnimal(Email), tty_clear, segundoMenuCliente(Email));
 	(Option == "2" -> (tty_clear, removeAnimal(Email), tty_clear, segundoMenuCliente(Email)));
-	Option == "0" -> mostraMenu;
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
