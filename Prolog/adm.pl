@@ -183,7 +183,25 @@ exibe_configuracao_hotelzinho :-nl,
 	writeln("O hotelzinho encontra-se indisponível")).
 
 editar_contato_administrador :-
-	writeln("insira o número do contato a ser atualizado.")
-	read_line_to_string(user_input, Contato),
+	setup_bd_login,
+	writeln("Confirme o email do adm"),
+	read_line_to_string(user_input, Email),
+	writeln("Confirme a senha do adm"),
+	read_line_to_string(user_input, Senha),
+
+	(administrador(Email, Senha, _) -> nl, 
+		writeln("insira o número do contato a ser atualizado."),
+		read_line_to_string(user_input, Contato), nl, 
+		retract(administrador(Email, Senha, _)),
+		assert(administrador(Email,Senha,Contato)),	
+		tell('./data/bd_adm.pl'), nl,
+		listing(administrador/3),
+		told, 
+		tty_clear,
+		writeln("Contato atualizado com sucesso."),
+		writeln("Pressione qualquer tecla para retornar ao menu."),
+		read_line_to_string(user_input, Option),
+		tty_clear;
+	writeln("Senha incorreta."), nl, false).
 	
 

@@ -1,4 +1,5 @@
 
 :- dynamic administrador/3.
 
-administrador("adm", "12345", "32478323").
+administrador("adm", "12345", "12345678").
+
