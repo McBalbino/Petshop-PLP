@@ -5,6 +5,7 @@ Petshop é um programa de gerenciamento de um petshop. O sistema possui dois tip
 
 ## Executáveis do projeto
 [Haskell](https://github.com/McBalbino/Petshop-PLP/tree/main/Haskell)
+[Prolog](https://github.com/McBalbino/Petshop-PLP/tree/main/Prolog)
 
 ## Funcionalidades de cada usuário
 * **Administrador**
