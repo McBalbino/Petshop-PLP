@@ -47,9 +47,11 @@ menuCliente :-
 segundoMenuCliente(Email) :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Cadastrar um animal"),
+	writeln("2 - Remover um animal"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> (cadastraAnimal(Email), segundoMenuCliente(Email));
+	(Option == "2" -> (removeAnimal(Email), segundoMenuCliente(Email)));
 	Option == "0" -> mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).

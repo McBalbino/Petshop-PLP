@@ -1,6 +1,5 @@
 
 :- dynamic animal/6.
 
-animal("rex", "maria@teste.com", "cachorro", "12", "5", "2").
-
+animal("bob", "amauri@gmail.com", "cachorro", "50", "10", "2").
 
