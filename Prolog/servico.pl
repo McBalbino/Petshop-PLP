@@ -18,13 +18,17 @@ menuServico(Email):-
 		tty_clear, writeln("Opção inválida!"), menuServico(Email)
 	).
 
+
 cadastraServico(Email, Servico):- 
 	setup_bd_servico,
 	writeln("Nome do animal: "),
 	read_line_to_string(user_input, NomeAnimal),
 	writeln("Data do atendimento: "),
 	read_line_to_string(user_input, Data),
-	assertz(servico(NomeAnimal, Email, Data, Servico, "Pendente")),
+	findall(_, servico(_,_, _, _, _, _), LS),
+	length(LS, Tamanho),
+	Id is Tamanho+1,
+	assertz(servico(Id, NomeAnimal, Email, Data, Servico, "Pendente")),
 	adicionaServico,
 	writeln("Serviço cadastrado com sucesso!"),
 	nl.
@@ -32,27 +36,55 @@ cadastraServico(Email, Servico):-
 adicionaServico:-
 	setup_bd_servico,
 	tell('./data/bd_servicos.pl'), nl,
-	listing(servico/5),
+	listing(servico/6),
 	told.
+
+fimMetodoServico:-
+	writeln("Clique em enter para continuar: "),
+	read_line_to_string(user_input, _).
+
+marcarServicoConcluido :- 
+	setup_bd_servico,
+	writeln("Informe o id do serviço a ser marcado como conluido: "),
+	read_line_to_string(user_input, IdStr),
+	number_codes(Id, IdStr),
+	((servico(Id,_,_,_,_,"Concluido") -> nl, writeln("Servico já concluido!");
+	retract(servico(Id, NomeAnimal, Email, Data, Servico, "Pendente")),
+	assertz(servico(Id, NomeAnimal, Email, Data, Servico, "Concluido")),
+	tell('./data/bd_servicos.pl'),
+	listing(servico/6),
+	told);
+	writeln("Servico não cadastrado"), nl),
+	fimMetodoServico.
+
 
 listarServicosConcluidosDoCliente(Email):-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, "Concluido"), ListaNomes),
-	findall(Servico, servico(_, Email, _, Servico, "Concluido"), ListaServicos),
+	findall(NomeAnimal, servico(_,NomeAnimal, Email, _, _, "Concluido"), ListaNomes),
+	findall(Servico, servico(_,_, Email, _, Servico, "Concluido"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
 
 listarServicosPendentesDoCliente(Email):-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, "Pendente"), ListaNomes),
-	findall(Servico, servico(_, Email, _, Servico, "Pendente"), ListaServicos),
+	findall(NomeAnimal, servico(_,NomeAnimal, Email, _, _, "Pendente"), ListaNomes),
+	findall(Servico, servico(_,_, Email, _, Servico, "Pendente"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
-
 
 listarServicosPendentes:-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, _, _, _, "Pendente"), ListaNomes),
-	findall(Servico, servico(_, _, _, Servico, "Pendente"), ListaServicos),
+	findall(NomeAnimal, servico(_,NomeAnimal, _, _, _, "Pendente"), ListaNomes),
+	findall(Servico, servico(_,_, _, _, Servico, "Pendente"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
+
+
+exibe_servicos([]).
+
+exibe_servicos([H]) :-
+	writeln(H).
+
+exibe_servicos([H|T]) :-
+	writeln(H),
+	exibe_servicos(T).
 
 exibirServicos([], []):-
 	writeln("Nenhum serviço disponível."), 
