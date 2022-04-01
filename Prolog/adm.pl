@@ -1,6 +1,6 @@
 :- consult('./data/bd_clientes.pl').
 :- consult('./data/bd_animais.pl').
-:- consult('./data/bd_disponibilidade_hotelzinho').
+:- consult('./data/bd_configuracao_hotelzinho.pl').
 
 
 setup_bd_cliente :-
@@ -9,8 +9,8 @@ setup_bd_cliente :-
 setup_bd_login :-
 	consult('./data/bd_adm.pl').
 
-setup_bd_disponibilidade_hotelzinho :-
-	consult('./data/bd_disponibilidade_hotelzinho').
+setup_bd_configuracao_hotelzinho :-
+	consult('./data/bd_configuracao_hotelzinho.pl').
 
 arquivo_vazio_adm :-
 	\+(predicate_property(administrador(_,_,_), dynamic)).
@@ -149,9 +149,9 @@ editar_dados_animal :-nl,
 	read_line_to_string(user_input, Email),
 	editar_dados_animal_aux(Nome, Email).
 
-alterar_disponibilidade_hotelzinho :-nl,
+alterar_configuracao_hotelzinho :-nl,
 	writeln("Alterando a disponibilidade do hotelzinho..."),
-	exibe_disponibilidade_hotelzinho, 
+	exibe_configuracao_hotelzinho, 
 	writeln("--------------------------------------------"), 
 	writeln("1 - Tornar o hotelzinho disponível"),
 	writeln("2 - Tornar o hotelzinho indisponível"),
@@ -160,15 +160,30 @@ alterar_disponibilidade_hotelzinho :-nl,
 	(Option == "1" -> ativa_desativa_hotelzinho("disponivel");
 	 Option == "2" -> ativa_desativa_hotelzinho("indisponivel");
 	 Option == "3" -> tty_clear, menuAdm;
-	 opcaoInvalida, alterar_disponibilidade_hotelzinho).
+	 opcaoInvalida, alterar_configuracao_hotelzinho).
 
-ativa_desativa_hotelzinho(status) :-
-	setup_bd_disponibilidade_hotelzinho,
-	assertz(disponibilidade_hotelzinho(status).
+ativa_desativa_hotelzinho(Status) :-
+	setup_bd_configuracao_hotelzinho,
+	retract(configuracao_hotelzinho("status", _)),
+	assert(configuracao_hotelzinho("status", Status)),
+	tell('./data/bd_configuracao_hotelzinho.pl'), nl,
+	listing(configuracao_hotelzinho/2),
+	told,
+	tty_clear,nl,
+	writeln("Configuração de hotelzinho atualizada com sucesso"),
+	writeln("Aperte qualquer tecla para voltar ao menu."),
+	read_line_to_string(user_input, Option),
+	tty_clear.
 	
-exibe_disponibilidade_hotelzinho :-nl,
-	setup_bd_disponibilidade_hotelzinho,
-	(disponibilidade_hotelzinho("disponivel"),
+exibe_configuracao_hotelzinho :-nl,
+	setup_bd_configuracao_hotelzinho,
+	(configuracao_hotelzinho(_,"disponivel"),
 	writeln("O hotelzinho encontra-se disponível");
-	disponibilidade_hotelzinho("indisponivel"),
+	configuracao_hotelzinho(_,"indisponivel"),
 	writeln("O hotelzinho encontra-se indisponível")).
+
+editar_contato_administrador :-
+	writeln("insira o número do contato a ser atualizado.")
+	read_line_to_string(user_input, Contato),
+	
+
