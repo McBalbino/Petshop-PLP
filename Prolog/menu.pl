@@ -88,9 +88,43 @@ exibir_contato_admin:- nl,
 	writeln(Contato),
 
 	writeln("pressione qualquer tecla para voltar ao menu"),
-	read_line_to_string(user_input, Option).
+	read_line_to_string(user_input, _).
 
 sair :- halt.
+
+alterar_configuracao_hotelzinho :-nl,
+	writeln("Alterando a disponibilidade do hotelzinho..."),
+	exibe_configuracao_hotelzinho, 
+	writeln("--------------------------------------------"), 
+	writeln("1 - Tornar o hotelzinho disponível"),
+	writeln("2 - Tornar o hotelzinho indisponível"),
+	writeln("3 - Voltar ao menu"),
+	read_line_to_string(user_input, Option),
+	(Option == "1" -> ativa_desativa_hotelzinho("disponivel");
+	 Option == "2" -> ativa_desativa_hotelzinho("indisponivel");
+	 Option == "3" -> tty_clear, menuAdm;
+	 opcaoInvalida, alterar_configuracao_hotelzinho).
+
+ativa_desativa_hotelzinho(Status) :-
+	setup_bd_configuracao_hotelzinho,
+	retract(configuracao_hotelzinho("status", _)),
+	assert(configuracao_hotelzinho("status", Status)),
+	tell('./data/bd_configuracao_hotelzinho.pl'), nl,
+	listing(configuracao_hotelzinho/2),
+	told,
+	tty_clear,nl,
+	writeln("Configuração de hotelzinho atualizada com sucesso"),
+	writeln("Aperte qualquer tecla para voltar ao menu."),
+	read_line_to_string(user_input, _),
+	tty_clear.
+	
+exibe_configuracao_hotelzinho :-nl,
+	setup_bd_configuracao_hotelzinho,
+	(configuracao_hotelzinho(_,"disponivel"),
+	writeln("O hotelzinho encontra-se disponível");
+	configuracao_hotelzinho(_,"indisponivel"),
+	writeln("O hotelzinho encontra-se indisponível")).
+
 
 opcaoInvalida :-
 	 writeln("Opcao invalida!"), nl.

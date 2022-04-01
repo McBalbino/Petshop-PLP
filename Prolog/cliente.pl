@@ -103,7 +103,7 @@ exibirAnimais([N|TN], [A|TA]):-
 
 fimListagemAnimal:-
 	writeln("Clique em enter para continuar: "),
-	read_line_to_string(user_input, Input).
+	read_line_to_string(user_input, _).
 
 listAnimais(A) :- 
 	findall([Nome, Email, Especie, Peso, Altura, Idade], animal(Nome, Email, Especie, Peso, Altura, Idade), A).

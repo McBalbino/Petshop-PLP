@@ -70,6 +70,6 @@ exibirServicos([N|TN], [S|TS]):-
 
 fimListagem:-
 	writeln("Clique em enter para continuar: "),
-	read_line_to_string(user_input, InputB).
+	read_line_to_string(user_input, _).
 
 
