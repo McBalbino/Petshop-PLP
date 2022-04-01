@@ -1,11 +1,16 @@
 :- consult('./data/bd_clientes.pl').
 :- consult('./data/bd_animais.pl').
+:- consult('./data/bd_disponibilidade_hotelzinho').
+
 
 setup_bd_cliente :-
 	consult('./data/bd_clientes.pl').
 
 setup_bd_login :-
 	consult('./data/bd_adm.pl').
+
+setup_bd_disponibilidade_hotelzinho :-
+	consult('./data/bd_disponibilidade_hotelzinho').
 
 arquivo_vazio_adm :-
 	\+(predicate_property(administrador(_,_,_), dynamic)).
@@ -143,3 +148,27 @@ editar_dados_animal :-nl,
 	writeln("Insira o email do dono do animal: "),
 	read_line_to_string(user_input, Email),
 	editar_dados_animal_aux(Nome, Email).
+
+alterar_disponibilidade_hotelzinho :-nl,
+	writeln("Alterando a disponibilidade do hotelzinho..."),
+	exibe_disponibilidade_hotelzinho, 
+	writeln("--------------------------------------------"), 
+	writeln("1 - Tornar o hotelzinho disponível"),
+	writeln("2 - Tornar o hotelzinho indisponível"),
+	writeln("3 - Voltar ao menu"),
+	read_line_to_string(user_input, Option),
+	(Option == "1" -> ativa_desativa_hotelzinho("disponivel");
+	 Option == "2" -> ativa_desativa_hotelzinho("indisponivel");
+	 Option == "3" -> tty_clear, menuAdm;
+	 opcaoInvalida, alterar_disponibilidade_hotelzinho).
+
+ativa_desativa_hotelzinho(status) :-
+	setup_bd_disponibilidade_hotelzinho,
+	assertz(disponibilidade_hotelzinho(status).
+	
+exibe_disponibilidade_hotelzinho :-nl,
+	setup_bd_disponibilidade_hotelzinho,
+	(disponibilidade_hotelzinho("disponivel"),
+	writeln("O hotelzinho encontra-se disponível");
+	disponibilidade_hotelzinho("indisponivel"),
+	writeln("O hotelzinho encontra-se indisponível")).
