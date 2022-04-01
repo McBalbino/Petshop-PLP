@@ -67,6 +67,7 @@ remove_cliente :-
 	writeln("Insira o email da conta a ser excluida: "),
 	read_line_to_string(user_input, Email),
     list_clientes(C),
+    remove_servico(Email),
     remove_animal(Email),
     retractall(cliente(_,_,_,_)),
     remove_cliente_aux(C, Email, C_att),
@@ -108,6 +109,29 @@ remove_animal(Email) :-
 remove_animal_aux([],_,[]).
 remove_animal_aux([H|T], Email, Out) :- member(Email, H), remove_animal_aux(T, Email, Out).
 remove_animal_aux([H|T], Email, [H|Out]) :- remove_animal_aux(T, Email, Out).
+
+add_servicos([]).
+add_servicos([[Nome, Email, Data, Servico, Status]|T]) :- 
+	add_servico(Nome, Email, Data, Servico, Status), add_servicos(T).
+
+add_servico(Nome, Email, Data, Servico, Status) :- 
+	assertz(servico(Nome, Email, Data, Servico, Status)).
+
+list_servicos(S) :- 
+	findall([Nome, Email, Data, Servico, Status], servico(Nome, Email, Data, Servico, Status), S).
+
+remove_servico(Email) :- 
+    list_servicos(S), 
+    retractall(servico(_,_,_,_,_)),
+    remove_servico_aux(S, Email, C_att),
+    add_servicos(C_att),
+    tell('./data/bd_servicos.pl'), nl,
+    listing(servico/5),
+    told.
+
+remove_servico_aux([],_,[]).
+remove_servico_aux([H|T], Email, Out) :- member(Email, H), remove_servico_aux(T, Email, Out).
+remove_servico_aux([H|T], Email, [H|Out]) :- remove_servico_aux(T, Email, Out).
 
 
 adicionaAnimalComNovosDados :-
