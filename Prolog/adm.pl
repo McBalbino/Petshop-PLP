@@ -16,7 +16,7 @@ loginAdm :-
 	read_line_to_string(user_input, Email),
 	writeln("Insira sua senha: "),
 	read_line_to_string(user_input, Senha),
-	(administrador(Email, Senha, _) -> nl, writeln("Login realizado com sucesso!");
+	(administrador(Email, Senha, _) -> nl, writeln("Login realizado com sucesso!"), nl;
 	writeln("Senha incorreta."), nl, false).
 
 login_adm :-
@@ -29,11 +29,11 @@ listaClientes :-
 	setup_bd_cliente,
 	findall(N, cliente(N, _, _, _), ListaClientes),
 	exibeClientes(ListaClientes),
-	told.
+	told, nl.
 
 exibeClientes([]) :-
 	nl,
-	writeln("Lista de clientes vazia.").
+	writeln("Lista de clientes vazia."), nl.
 
 exibeClientes([H]) :-
 	writeln(H).
@@ -63,11 +63,11 @@ remove_cliente :-
     add_clientes(C_att),
     tell('./data/bd_clientes.pl'), nl,
     listing(cliente/4),
-    told.
+    told, nl.
 
 remove_cliente_aux([],_,[]) :-
 	nl,
-	writeln("Usuário inexistente").
+	writeln("Usuário inexistente"), nl.
 remove_cliente_aux([H|T], Email, T) :- member(Email, H).
 remove_cliente_aux([H|T], Email, [H|Out]) :- remove_cliente_aux(T, Email, Out).
 

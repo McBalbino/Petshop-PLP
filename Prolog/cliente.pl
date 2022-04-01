@@ -23,7 +23,8 @@ cadastraCliente :-
 	read_line_to_string(user_input, Senha),
 	nl, writeln("Insira seu telefone: "),
 	read_line_to_string(user_input, Telefone),
-	(get_emails_clientes(Emails), member(Email, Emails) -> nl, writeln("Email já cadastrado.");
+	nl,
+	(get_emails_clientes(Emails), member(Email, Emails) -> nl, writeln("Email já cadastrado."), nl;
 	assertz(cliente(Nome, Email, Senha, Telefone)),
 	adicionaCliente,
 	writeln("Cliente cadastrado com sucesso!"),nl).
@@ -37,7 +38,7 @@ loginCliente(Email) :-
 	read_line_to_string(user_input, Email),
 	writeln("Insira sua senha: "),
 	read_line_to_string(user_input, Senha),
-	(cliente(_, Email, Senha, _) -> nl, writeln("Login realizado com sucesso!");
+	(cliente(_, Email, Senha, _) -> nl, writeln("Login realizado com sucesso!"), nl;
 	writeln("Senha incorreta."), nl, false).
 
 login_cliente(Email) :-
@@ -64,10 +65,11 @@ cadastraAnimal(Email) :-
 	read_line_to_string(user_input, Altura),
 	nl, writeln("Insira a idade do animal: "),
 	read_line_to_string(user_input, Idade),
-	(get_nome_animal(A), member([Nome, Email],  A) -> nl, writeln("Animal já cadastrado.");
+	nl,
+	(get_nome_animal(A), member([Nome, Email],  A) -> nl, writeln("Animal já cadastrado."), nl;
 	assertz(animal(Nome, Email, Especie, Peso, Altura, Idade)),
 	adicionaAnimal,
-	writeln("Animal cadastrado com sucesso!")).
+	writeln("Animal cadastrado com sucesso!"), nl).
 
 get_nome_animal(A) :- 
 	findall([Nome,Email], animal(Nome,Email,_,_,_,_), A).
