@@ -35,11 +35,18 @@ adicionaServico:-
 	listing(servico/5),
 	told.
 
-listarServicos(Email):-
+listarServicosConcluidosDoCliente(Email):-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, _), ListaNomes),
-	findall(Servico, servico(_, Email, _, Servico, _), ListaServicos),
+	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, "Concluido"), ListaNomes),
+	findall(Servico, servico(_, Email, _, Servico, "Concluido"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
+
+listarServicosPendentesDoCliente(Email):-
+	setup_bd_servico,
+	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, "Pendente"), ListaNomes),
+	findall(Servico, servico(_, Email, _, Servico, "Pendente"), ListaServicos),
+	exibirServicos(ListaNomes, ListaServicos).
+
 
 listarServicosPendentes:-
 	setup_bd_servico,
@@ -48,7 +55,7 @@ listarServicosPendentes:-
 	exibirServicos(ListaNomes, ListaServicos).
 
 exibirServicos([], []):-
-	writeln("Nenhum serviço cadastrado."), 
+	writeln("Nenhum serviço disponível."), 
 	nl,
 	fimListagem.
 
