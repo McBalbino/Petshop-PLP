@@ -13,8 +13,6 @@ adicionaCliente :-
 	listing(cliente/4),
 	told.
 
-
-
 cadastraCliente :-
 	setup_bd,
 	nl, writeln("Insira seu nome: "),

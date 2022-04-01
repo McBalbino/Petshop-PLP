@@ -33,6 +33,7 @@ login_adm :-
 listaClientes :- 
 	setup_bd_cliente,
 	findall(N, cliente(N, _, _, _), ListaClientes),
+	writeln("Usuários cadastrados: "),
 	exibeClientes(ListaClientes),
 	told, nl,
 	fimListagemClientes.
@@ -43,12 +44,14 @@ fimListagemClientes:-
 
 exibeClientes([]) :-
 	nl,
-	writeln("Lista de clientes vazia."), nl.
+	writeln("Nenhum usuário cadastrado.").
 
 exibeClientes([H]) :-
+	write("- "),
 	writeln(H).
 
 exibeClientes([H|T]) :-
+	write("- "),
 	writeln(H),
 	exibeClientes(T).
 
