@@ -33,10 +33,12 @@ menuAdm :-
 	writeln("Selecione uma das opções abaixo:"),
 	writeln("1 - Ver usuarios cadastrados no sistema"),
 	writeln("2 - Remover usuários"),
+	writeln("3 - Editar dados de um animal"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, listaClientes, menuAdm;
 	Option == "2" -> tty_clear, remove_cliente, tty_clear, menuAdm;
+	Option == "3" -> tty_clear, editar_dados_animal, tty_clear, menuAdm;
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	menuAdm).
