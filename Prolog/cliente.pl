@@ -64,7 +64,10 @@ cadastraAnimal(Email) :-
 	read_line_to_string(user_input, Altura),
 	nl, writeln("Insira a idade do animal: "),
 	read_line_to_string(user_input, Idade),
+	(get_nome_animal(A), member([Nome, Email],  A) -> nl, writeln("Animal já cadastrado.");
 	assertz(animal(Nome, Email, Especie, Peso, Altura, Idade)),
 	adicionaAnimal,
-	writeln("Animal cadastrado com sucesso!").
+	writeln("Animal cadastrado com sucesso!")).
 
+get_nome_animal(A) :- 
+	findall([Nome,Email], animal(Nome,Email,_,_,_,_), A).
