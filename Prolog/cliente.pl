@@ -122,7 +122,8 @@ removeAnimalAux([H|T], Nome, Email, Out) :-
 	member(Email, H),
 	removeAnimalAux(T, Nome, Email, Out), 
 	writeln("Animal removido com sucesso!").
-removeAnimalAux([H|T], Nome, Email, [H|Out]) :- removeAnimalAux(T, Nome, Email, Out).
+removeAnimalAux([H|T], Nome, Email, [H|Out]) :- 
+	removeAnimalAux(T, Nome, Email, Out).
 
 addAnimal(Nome, Email, Especie, Peso, Altura, Idade) :- 
 	assertz(animal(Nome, Email, Especie, Peso, Altura, Idade)).

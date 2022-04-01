@@ -1,3 +1,5 @@
+:- consult('./data/bd_servicos.pl').
+
 setup_bd_servico :-
 	consult('./data/bd_servicos.pl').
 
@@ -127,3 +129,49 @@ editarDataServico :-
 	told);
 	writeln("Servico não cadastrado"), nl),
 	fimMetodoServico.
+
+
+cancelarServico(Email):-
+	setup_bd_servico,
+	writeln("Informe o id do serviço a ser cancelado: "),
+	read_line_to_string(user_input, IdStr),
+	number_codes(Id, IdStr),
+	removeServico(Id, Email).
+	
+removeServico(Id, Email):-
+	listServicos(R),
+	retractall(servico(_,_,_,_,_,_)),
+	removeServicoAux(R, Id, Email, S_R),
+	addServicos(S_R),
+	tell('./data/bd_servicos.pl'), nl,
+	listing(servico/6),
+	told.
+
+
+removeServicoAux([H|T], Id, Email, Result):-
+	member(Id, H),
+	member(Email, H),
+	removeServicoAux(T, Id, Email, Result).
+
+removeServicoAux([H|T], Id, Email, [H|Result]):-
+	removeServicoAux(T, Id, Email, Result).
+
+removeServicoAux([H], _, _,[H|Result]) :-
+	writeln("Serviço cancelado com sucesso!"),
+	fimListagem.
+
+removeServicoAux([],_,_,[]) :-
+	nl,
+	writeln("Serviço inexistente"), 
+	nl.
+
+listServicos(R):-
+	findall([Id, NomeAnimal, Email, Data, Servico, Status], servico(Id, NomeAnimal, Email, Data, Servico, Status), R).
+
+addServico(Id, NomeAnimal, Email, Data, Servico, Status) :- 
+	assertz(servico(Id, NomeAnimal, Email, Data, Servico, Status)).
+
+addServicos([]).
+addServicos([[Id, NomeAnimal, Email, Data, Servico, Status]|T]) :-
+	addServico(Id, NomeAnimal, Email, Data, Servico, Status), 
+	addServicos(T).

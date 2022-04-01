@@ -76,6 +76,7 @@ segundoMenuCliente(Email) :-
 	writeln("4 - Listar agendamentos pendentes"),
 	writeln("5 - Listar agendamentos concluídos"),
 	writeln("6 - Remover um animal"),
+	writeln("7 - Cancelar um serviço"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> (tty_clear, cadastraAnimal(Email), tty_clear, segundoMenuCliente(Email));
@@ -84,6 +85,7 @@ segundoMenuCliente(Email) :-
 	(Option == "4" -> (tty_clear, listarServicosPendentesDoCliente(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "5" -> (tty_clear, listarServicosConcluidosDoCliente(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "6" -> (tty_clear, removeAnimal(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "7" -> (tty_clear, cancelarServico(Email), tty_clear, segundoMenuCliente(Email)));
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
