@@ -34,7 +34,12 @@ listaClientes :-
 	setup_bd_cliente,
 	findall(N, cliente(N, _, _, _), ListaClientes),
 	exibeClientes(ListaClientes),
-	told, nl.
+	told, nl,
+	fimListagemClientes.
+
+fimListagemClientes:-
+	writeln("Clique em enter para continuar: "),
+	read_line_to_string(user_input, _).
 
 exibeClientes([]) :-
 	nl,
