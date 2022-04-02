@@ -7,3 +7,4 @@ animal("bob", "amauri@mail.com", "cachorro", "123456", "123456", "123465").
 animal("bob2", "amauri@mail.com", "cachorro", "123", "123", "123").
 animal("jorge", "carlos", "jorge", "jorge", "jorge", "jorge").
 
+

@@ -1,3 +1,5 @@
+:- consult('./data/bd_servicos.pl').
+
 setup_bd_servico :-
 	consult('./data/bd_servicos.pl').
 
@@ -18,13 +20,17 @@ menuServico(Email):-
 		tty_clear, writeln("Opção inválida!"), menuServico(Email)
 	).
 
+
 cadastraServico(Email, Servico):- 
 	setup_bd_servico,
 	writeln("Nome do animal: "),
 	read_line_to_string(user_input, NomeAnimal),
 	writeln("Data do atendimento: "),
 	read_line_to_string(user_input, Data),
-	assertz(servico(NomeAnimal, Email, Data, Servico, "Pendente")),
+	findall(_, servico(_,_, _, _, _, _), LS),
+	length(LS, Tamanho),
+	Id is Tamanho+1,
+	assertz(servico(Id, NomeAnimal, Email, Data, Servico, "Pendente")),
 	adicionaServico,
 	writeln("Serviço cadastrado com sucesso!"),
 	nl.
@@ -32,27 +38,55 @@ cadastraServico(Email, Servico):-
 adicionaServico:-
 	setup_bd_servico,
 	tell('./data/bd_servicos.pl'), nl,
-	listing(servico/5),
+	listing(servico/6),
 	told.
+
+fimMetodoServico:-
+	writeln("Clique em enter para continuar: "),
+	read_line_to_string(user_input, _).
+
+marcarServicoConcluido :- 
+	setup_bd_servico,
+	writeln("Informe o id do serviço a ser marcado como conluido: "),
+	read_line_to_string(user_input, IdStr),
+	number_codes(Id, IdStr),
+	((servico(Id,_,_,_,_,"Concluido") -> nl, writeln("Servico já concluido!");
+	retract(servico(Id, NomeAnimal, Email, Data, Servico, "Pendente")),
+	assertz(servico(Id, NomeAnimal, Email, Data, Servico, "Concluido")),
+	tell('./data/bd_servicos.pl'),
+	listing(servico/6),
+	told);
+	writeln("Servico não cadastrado"), nl),
+	fimMetodoServico.
+
 
 listarServicosConcluidosDoCliente(Email):-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, "Concluido"), ListaNomes),
-	findall(Servico, servico(_, Email, _, Servico, "Concluido"), ListaServicos),
+	findall(NomeAnimal, servico(_,NomeAnimal, Email, _, _, "Concluido"), ListaNomes),
+	findall(Servico, servico(_,_, Email, _, Servico, "Concluido"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
 
 listarServicosPendentesDoCliente(Email):-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, Email, _, _, "Pendente"), ListaNomes),
-	findall(Servico, servico(_, Email, _, Servico, "Pendente"), ListaServicos),
+	findall(NomeAnimal, servico(_,NomeAnimal, Email, _, _, "Pendente"), ListaNomes),
+	findall(Servico, servico(_,_, Email, _, Servico, "Pendente"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
-
 
 listarServicosPendentes:-
 	setup_bd_servico,
-	findall(NomeAnimal, servico(NomeAnimal, _, _, _, "Pendente"), ListaNomes),
-	findall(Servico, servico(_, _, _, Servico, "Pendente"), ListaServicos),
+	findall(NomeAnimal, servico(_,NomeAnimal, _, _, _, "Pendente"), ListaNomes),
+	findall(Servico, servico(_,_, _, _, Servico, "Pendente"), ListaServicos),
 	exibirServicos(ListaNomes, ListaServicos).
+
+
+exibe_servicos([]).
+
+exibe_servicos([H]) :-
+	writeln(H).
+
+exibe_servicos([H|T]) :-
+	writeln(H),
+	exibe_servicos(T).
 
 exibirServicos([], []):-
 	writeln("Nenhum serviço disponível."), 
@@ -79,4 +113,65 @@ fimListagem:-
 	writeln("Clique em enter para continuar: "),
 	read_line_to_string(user_input, _).
 
+editarDataServico :- 
+	setup_bd_servico,
+	writeln("Informe o id do serviço a ser remarcado: "),
+	read_line_to_string(user_input, IdStr),
+	number_codes(Id, IdStr),
+	((servico(Id,_,_,_,_,"Concluido") -> nl, writeln("Servico não pode ser remarcado, pois já foi concluido!");
 
+	writeln("Informe a nova data do agendamento: "),
+	read_line_to_string(user_input, NovaData),
+	retract(servico(Id, NomeAnimal, Email, _, Servico, Status)),
+	assertz(servico(Id, NomeAnimal, Email, NovaData, Servico, Status)),
+	tell('./data/bd_servicos.pl'),
+	listing(servico/6),
+	told);
+	writeln("Servico não cadastrado"), nl),
+	fimMetodoServico.
+
+
+cancelarServico(Email):-
+	setup_bd_servico,
+	writeln("Informe o id do serviço a ser cancelado: "),
+	read_line_to_string(user_input, IdStr),
+	number_codes(Id, IdStr),
+	removeServico(Id, Email).
+	
+removeServico(Id, Email):-
+	listServicos(R),
+	retractall(servico(_,_,_,_,_,_)),
+	removeServicoAux(R, Id, Email, S_R),
+	addServicos(S_R),
+	tell('./data/bd_servicos.pl'), nl,
+	listing(servico/6),
+	told.
+
+
+removeServicoAux([H|T], Id, Email, Result):-
+	member(Id, H),
+	member(Email, H),
+	removeServicoAux(T, Id, Email, Result).
+
+removeServicoAux([H|T], Id, Email, [H|Result]):-
+	removeServicoAux(T, Id, Email, Result).
+
+removeServicoAux([H], _, _,[H|Result]) :-
+	writeln("Serviço cancelado com sucesso!"),
+	fimListagem.
+
+removeServicoAux([],_,_,[]) :-
+	nl,
+	writeln("Serviço inexistente"), 
+	nl.
+
+listServicos(R):-
+	findall([Id, NomeAnimal, Email, Data, Servico, Status], servico(Id, NomeAnimal, Email, Data, Servico, Status), R).
+
+addServico(Id, NomeAnimal, Email, Data, Servico, Status) :- 
+	assertz(servico(Id, NomeAnimal, Email, Data, Servico, Status)).
+
+addServicos([]).
+addServicos([[Id, NomeAnimal, Email, Data, Servico, Status]|T]) :-
+	addServico(Id, NomeAnimal, Email, Data, Servico, Status), 
+	addServicos(T).
