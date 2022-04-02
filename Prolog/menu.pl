@@ -1,6 +1,7 @@
 :- include('./cliente.pl').
 :- include('./adm.pl').
 :- include('./servico.pl').
+:- include('./hotelzinho.pl').
 
 letreiro :-
 	writeln("Bem-vindo ao sistema do "), nl,
@@ -38,14 +39,16 @@ menuAdm :-
 	writeln("4 - Alterar disponibilidade do hotelzinho"),
 	writeln("5 - Atualizar contato do administrador"),
 	writeln("6 - Ver serviços agendados pendentes"),
+	writeln("7 - Acessar gerência do Hotelzinho"),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> tty_clear, listaClientes, tty_clear, menuAdm;
-	Option == "2" -> tty_clear, remove_cliente, tty_clear, menuAdm;
+	Option == "2" -> tty_clear, remove_cliente, menuAdm;
 	Option == "3" -> tty_clear, editar_dados_animal, tty_clear, menuAdm;
 	Option == "4" -> tty_clear, alterar_configuracao_hotelzinho, menuAdm;
 	Option == "5" -> tty_clear, editar_contato_administrador, menuAdm;
 	Option == "6" -> tty_clear, listarServicosPendentes, tty_clear, menuAdm;
+	Option == "7" -> tty_clear, hotelzinhoAdm, tty_clear, menuAdm;
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	menuAdm).
@@ -72,6 +75,7 @@ segundoMenuCliente(Email) :-
 	writeln("4 - Listar agendamentos pendentes"),
 	writeln("5 - Listar agendamentos concluídos"),
 	writeln("6 - Remover um animal"),
+	writeln("7 - Acessar o hotelzinho PET."),
 	writeln("0 - Retornar ao menu principal"),
 	read_line_to_string(user_input, Option),
 	(Option == "1" -> (tty_clear, cadastraAnimal(Email), tty_clear, segundoMenuCliente(Email));
@@ -80,6 +84,7 @@ segundoMenuCliente(Email) :-
 	(Option == "4" -> (tty_clear, listarServicosPendentesDoCliente(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "5" -> (tty_clear, listarServicosConcluidosDoCliente(Email), tty_clear, segundoMenuCliente(Email)));
 	(Option == "6" -> (tty_clear, removeAnimal(Email), tty_clear, segundoMenuCliente(Email)));
+	(Option == "7" -> (tty_clear, menuHotelzinho(Email), tty_clear, segundoMenuCliente(Email)));
 	Option == "0" -> tty_clear, mostraMenu;
 	opcaoInvalida,
 	segundoMenuCliente).
