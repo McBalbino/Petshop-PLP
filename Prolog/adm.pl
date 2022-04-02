@@ -114,22 +114,22 @@ remove_animal_aux([H|T], Email, Out) :- member(Email, H), remove_animal_aux(T, E
 remove_animal_aux([H|T], Email, [H|Out]) :- remove_animal_aux(T, Email, Out).
 
 add_servicos([]).
-add_servicos([[Nome, Email, Data, Servico, Status]|T]) :- 
-	add_servico(Nome, Email, Data, Servico, Status), add_servicos(T).
+add_servicos([[Id, Nome, Email, Data, Servico, Status]|T]) :- 
+	add_servico(Id, Nome, Email, Data, Servico, Status), add_servicos(T).
 
-add_servico(Nome, Email, Data, Servico, Status) :- 
-	assertz(servico(Nome, Email, Data, Servico, Status)).
+add_servico(Id, Nome, Email, Data, Servico, Status) :- 
+	assertz(servico(Id, Nome, Email, Data, Servico, Status)).
 
 list_servicos(S) :- 
-	findall([Nome, Email, Data, Servico, Status], servico(Nome, Email, Data, Servico, Status), S).
+	findall([Id, Nome, Email, Data, Servico, Status], servico(Id, Nome, Email, Data, Servico, Status), S).
 
 remove_servico(Email) :- 
     list_servicos(S), 
-    retractall(servico(_,_,_,_,_)),
+    retractall(servico(_,_,_,_,_,_)),
     remove_servico_aux(S, Email, C_att),
     add_servicos(C_att),
     tell('./data/bd_servicos.pl'), nl,
-    listing(servico/5),
+    listing(servico/6),
     told.
 
 remove_servico_aux([],_,[]).
